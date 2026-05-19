@@ -502,14 +502,14 @@ textarea.f-input{resize:none;min-height:80px;line-height:1.55}
       <div class="logo-name">Spotted</div>
     </div>
     <div class="tb-chips">
-      <div class="chip chip-streak" onclick="go('profile')"><span class="c-icon">🔥</span><span class="c-val" id="streak-val">12</span><span class="c-lbl">streak</span></div>
-      <div class="chip chip-score" onclick="go('profile')"><span class="c-icon">👁</span><span class="c-val" id="score-val">847</span><span class="c-lbl">pts</span></div>
+      <!--<div class="chip chip-streak" onclick="go('profile')"><span class="c-icon">🔥</span><span class="c-val" id="streak-val">12</span><span class="c-lbl">streak</span></div>-->
+      <!--<div class="chip chip-score" onclick="go('profile')"><span class="c-icon">👁</span><span class="c-val" id="score-val">847</span><span class="c-lbl">pts</span></div>-->
     </div>
   </div>
   <div class="tb2">
-    <span class="pts-lbl" id="pts-lbl">10 pts to allocate</span>
-    <div class="pts-bar"><div class="pts-fill" id="pts-fill" style="width:0"></div></div>
-    <span class="pts-left" id="pts-left">10</span>
+    <span style="display:none" class="pts-lbl" id="pts-lbl">10 pts to allocate</span>
+    <div style="display:none" class="pts-bar"><div class="pts-fill" id="pts-fill" style="width:0"></div></div>
+    <span  style="display:none" class="pts-left" id="pts-left">10</span>
   </div>
 </div>
 
@@ -519,7 +519,7 @@ textarea.f-input{resize:none;min-height:80px;line-height:1.55}
   <!-- ① FEED -->
   <div class="screen active" id="s-feed">
     <div class="feed-meta">
-      <div class="fm-edition" id="feed-ed">Edition #122</div>
+      <div style="display:none" class="fm-edition" id="feed-ed">Edition #122</div>
       <div class="fm-pips" id="feed-pips"></div>
     </div>
     <div id="feed-wrap">
@@ -531,13 +531,13 @@ textarea.f-input{resize:none;min-height:80px;line-height:1.55}
     </div>
     <div id="done-overlay">
       <div class="do-fire">🔥</div>
-      <div class="do-streak" id="do-s">13</div>
-      <div class="do-slabel">day streak</div>
+      <!--<div class="do-streak" id="do-s">13</div>-->
+      <!--<div class="do-slabel">day streak</div>-->
       <div class="do-title">You've seen all 5 creators!</div>
       <div class="do-sub">Streak secured. New edition drops at midnight.<br>Come back tomorrow — don't break the chain.</div>
-      <div class="do-pts-box" id="do-pts">👁 7/10 points allocated — results at midnight</div>
-      <button class="do-btn" onclick="go('ranking')">See live ranking →</button>
-      <button class="do-back" onclick="hideDone()">← Redistribute my points</button>
+      <!--<div class="do-pts-box" id="do-pts">👁 7/10 points allocated — results at midnight</div>-->
+      <!--<button class="do-btn" onclick="go('ranking')">See live ranking →</button>-->
+      <!--<button class="do-back" onclick="hideDone()">← Redistribute my points</button>-->
     </div>
   </div>
 
@@ -707,6 +707,7 @@ textarea.f-input{resize:none;min-height:80px;line-height:1.55}
 </div>
 
 <!-- BOTTOM NAV -->
+ <!--
 <div id="bnav">
   <button class="nb on" id="n-feed" onclick="go('feed')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -728,7 +729,7 @@ textarea.f-input{resize:none;min-height:80px;line-height:1.55}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <span>Profile</span>
   </button>
-</div>
+</div>-->
 
 <div id="milestone-bar"><span>🎉</span><span id="ms-txt">7-day streak! Priority submission unlocked</span></div>
 <div id="toast"></div>
@@ -802,6 +803,7 @@ function buildFeed(){
       <div class="cc-body">
         <div class="cc-note"><div class="cc-note-lbl">Editor's note</div><div class="cc-note-txt">${c.note}</div></div>
         <div class="cc-tags">${c.tags.map(t=>`<span class="cc-tag">${t}</span>`).join('')}</div>
+        <!--
         <div class="cc-comm">
           <div class="cc-comm-top"><span class="cc-comm-lbl">Community score</span><span class="cc-comm-pts" id="cpts-${i}">${c.totalPts} pts</span></div>
           <div class="cc-bar-track"><div class="cc-bar-fill" id="cfill-${i}" style="width:${pct}%"></div></div>
@@ -811,7 +813,7 @@ function buildFeed(){
             <span class="alloc-count" id="ac-${i}">0</span>
             <button class="alloc-btn plus" onclick="addPt(${i})">+</button>
           </div>
-        </div>
+        </div>-->
         <div class="cc-actions">
           <button class="btn-visit" onclick="toast('🔗 Opening profile…')">Visit profile →</button>
           <button class="ico-btn${saved.has(i)?' on':''}" id="sv-${i}" onclick="toggleSave(${i})">
