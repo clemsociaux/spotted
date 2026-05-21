@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebhookInbox</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;
+  --gray-50:#f8f9fc;
+  --gray-100:#f1f3f8;
+  --gray-200:#e4e8f0;
+  --gray-300:#cdd3e0;
+  --gray-400:#9aa3b5;
+  --gray-500:#6b7589;
+  --gray-600:#4a5268;
+  --gray-700:#323a52;
+  --gray-800:#1e2438;
+  --gray-900:#0f1420;
+  --blue-50:#eff4ff;
+  --blue-100:#dbe6fe;
+  --blue-500:#3b71f8;
+  --blue-600:#2d5ee8;
+  --blue-700:#1e4bc8;
+  --green-50:#f0fdf4;
+  --green-100:#dcfce7;
+  --green-500:#22c55e;
+  --green-600:#16a34a;
+  --red-50:#fff1f2;
+  --red-100:#ffe4e6;
+  --red-500:#ef4444;
+  --red-600:#dc2626;
+  --amber-50:#fffbeb;
+  --amber-100:#fef3c7;
+  --amber-500:#f59e0b;
+  --amber-600:#d97706;
+  --purple-50:#faf5ff;
+  --purple-500:#a855f7;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --radius:8px;
+  --radius-lg:12px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg:0 12px 32px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.06);
+}
+html,body{height:100%;font-family:var(--sans);font-size:14px;color:var(--gray-800);background:var(--gray-50);overflow:hidden}
+
+/* APP SHELL */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:228px;flex-shrink:0;background:var(--white);border-right:1px solid var(--gray-200);display:flex;flex-direction:column;overflow:hidden}
+.logo-area{padding:18px 16px 14px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;border-radius:9px;background:var(--blue-500);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.logo-text{font-size:14px;font-weight:700;color:var(--gray-900);letter-spacing:-.3px}
+.logo-version{font-size:10px;color:var(--gray-400);font-family:var(--mono);margin-left:auto}
+.nav-wrap{flex:1;padding:10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.nav-label{font-size:10px;font-weight:600;color:var(--gray-400);letter-spacing:.8px;text-transform:uppercase;padding:10px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius);color:var(--gray-600);cursor:pointer;transition:all .12s;font-size:13px;font-weight:500;position:relative;text-decoration:none}
+.nav-item:hover{background:var(--gray-100);color:var(--gray-800)}
+.nav-item.active{background:var(--blue-50);color:var(--blue-600);font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;background:var(--blue-500);border-radius:0 3px 3px 0}
+.nav-item svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.nav-badge{margin-left:auto;font-size:11px;font-weight:600;font-family:var(--mono);min-width:20px;height:20px;padding:0 6px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.nav-badge.blue{background:var(--blue-100);color:var(--blue-600)}
+.nav-badge.red{background:var(--red-100);color:var(--red-600)}
+.nav-badge.amber{background:var(--amber-100);color:var(--amber-600)}
+.sidebar-bottom{padding:12px 8px;border-top:1px solid var(--gray-200)}
+.user-card{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;transition:background .12s}
+.user-card:hover{background:var(--gray-100)}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#3b71f8,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name{font-size:13px;font-weight:600;color:var(--gray-700)}
+.user-plan{font-size:11px;color:var(--gray-400)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* TOPBAR */
+.topbar{height:56px;background:var(--white);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:12px;padding:0 24px;flex-shrink:0}
+.page-title{font-size:16px;font-weight:700;color:var(--gray-900);letter-spacing:-.3px}
+.page-subtitle{font-size:12px;color:var(--gray-400);margin-left:4px}
+.topbar-gap{flex:1}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--green-600);background:var(--green-50);border:1px solid var(--green-100);padding:4px 10px;border-radius:20px}
+.live-dot{width:7px;height:7px;background:var(--green-500);border-radius:50%;animation:livepulse 2s infinite}
+@keyframes livepulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,197,94,.4)}60%{opacity:.8;box-shadow:0 0 0 5px rgba(34,197,94,0)}}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;transition:all .12s;border:1px solid var(--gray-200);background:var(--white);color:var(--gray-700);font-family:var(--sans);white-space:nowrap}
+.btn:hover{background:var(--gray-50);border-color:var(--gray-300);color:var(--gray-900)}
+.btn.primary{background:var(--blue-500);border-color:var(--blue-500);color:#fff}
+.btn.primary:hover{background:var(--blue-600);border-color:var(--blue-600)}
+.btn.danger{border-color:var(--red-100);color:var(--red-600)}
+.btn.danger:hover{background:var(--red-50)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* CONTENT AREA */
+.content-area{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+
+/* PAGE VISIBILITY */
+.page{display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0}
+.page.active{display:flex}
+
+/* ── DASHBOARD PAGE ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 24px;border-bottom:1px solid var(--gray-200);flex-shrink:0}
+.stat-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.stat-value{font-size:26px;font-weight:700;font-family:var(--mono);letter-spacing:-1px;line-height:1}
+.stat-label{font-size:11px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.stat-card.blue .stat-value{color:var(--blue-500)}
+.stat-card.green .stat-value{color:var(--green-500)}
+.stat-card.red .stat-value{color:var(--red-500)}
+.split-view{flex:1;display:flex;overflow:hidden;min-height:0}
+
+/* EVENT LIST PANEL */
+.ev-panel{width:380px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--gray-200);background:var(--white);overflow:hidden}
+.filter-row{padding:12px 14px;border-bottom:1px solid var(--gray-200);display:flex;gap:8px;flex-shrink:0;background:var(--gray-50)}
+.search-box{flex:1;position:relative}
+.search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--gray-400);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none}
+.search-input{width:100%;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:7px 10px 7px 30px;font-size:13px;font-family:var(--sans);color:var(--gray-800);outline:none;transition:border-color .15s}
+.search-input:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,113,248,.1)}
+.search-input::placeholder{color:var(--gray-400)}
+.filter-sel{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:7px 8px;font-size:12px;color:var(--gray-600);font-family:var(--sans);outline:none;cursor:pointer;transition:border-color .15s}
+.filter-sel:focus{border-color:var(--blue-500)}
+.ev-list{flex:1;overflow-y:auto;padding:8px}
+.ev-list::-webkit-scrollbar{width:4px}
+.ev-list::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:2px}
+.ev-item{padding:11px 12px;border-radius:var(--radius);cursor:pointer;transition:all .12s;border:1px solid transparent;margin-bottom:3px;position:relative}
+.ev-item:hover{background:var(--gray-50);border-color:var(--gray-200)}
+.ev-item.selected{background:var(--blue-50);border-color:var(--blue-100)}
+.ev-item.selected::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--blue-500);border-radius:0 2px 2px 0}
+.ev-row1{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.ev-type{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--gray-800);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-row2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-400)}
+.ev-src{color:var(--gray-500);font-weight:500}
+.ev-id{font-family:var(--mono);font-size:10px}
+.ev-time{margin-left:auto;font-family:var(--mono);font-size:10px}
+
+/* STATUS BADGES */
+.badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;flex-shrink:0;font-family:var(--mono)}
+.badge.success{background:var(--green-100);color:var(--green-600)}
+.badge.failed{background:var(--red-100);color:var(--red-600)}
+.badge.pending{background:var(--amber-100);color:var(--amber-600)}
+.badge.blue{background:var(--blue-100);color:var(--blue-600)}
+
+/* DETAIL PANEL */
+.det-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:var(--white)}
+.det-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--gray-400)}
+.det-empty svg{width:48px;height:48px;stroke:currentColor;fill:none;stroke-width:1;opacity:.4}
+.det-empty p{font-size:13px;color:var(--gray-400)}
+.det-topbar{padding:14px 20px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--gray-50)}
+.det-type{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--gray-800)}
+.det-actions{margin-left:auto;display:flex;gap:8px}
+.tabs-bar{display:flex;border-bottom:1px solid var(--gray-200);padding:0 20px;flex-shrink:0;background:var(--white)}
+.tab-item{padding:11px 14px;font-size:13px;font-weight:500;color:var(--gray-500);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1px}
+.tab-item:hover{color:var(--gray-700)}
+.tab-item.active{color:var(--blue-600);border-bottom-color:var(--blue-500)}
+.det-body{flex:1;overflow-y:auto;padding:20px}
+.det-body::-webkit-scrollbar{width:4px}
+.det-body::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:2px}
+
+/* CODE BLOCKS */
+.code-wrap{background:var(--gray-900);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
+.code-header{padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.08)}
+.code-header-text{font-size:11px;color:var(--gray-400);font-family:var(--mono)}
+.code-body{padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.8;max-height:320px;overflow-y:auto}
+.code-body::-webkit-scrollbar{width:4px;height:4px}
+.code-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+.code-body pre{margin:0}
+.jk{color:#c678dd}.js{color:#98c379}.jn{color:#d19a66}.jb{color:#61afef}.jnull{color:#abb2bf;opacity:.7}
+
+/* HEADERS TABLE */
+.headers-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden}
+.headers-table tr{border-bottom:1px solid var(--gray-100)}
+.headers-table tr:last-child{border-bottom:none}
+.headers-table td{padding:10px 14px;vertical-align:top}
+.headers-table td:first-child{font-family:var(--mono);font-size:11px;color:var(--gray-500);width:38%;font-weight:500;background:var(--gray-50)}
+.headers-table td:last-child{font-family:var(--mono);font-size:11px;color:var(--gray-700);word-break:break-all}
+
+/* META GRID */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.meta-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow-sm)}
+.meta-label{font-size:10px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.meta-value{font-family:var(--mono);font-size:12px;color:var(--gray-700);word-break:break-all}
+
+/* SECTION HEADINGS */
+.section-head{font-size:11px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.section-head::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+
+/* ── FULL PAGES (non-dashboard) ── */
+.full-page{flex:1;overflow-y:auto;padding:24px;background:var(--gray-50)}
+.full-page::-webkit-scrollbar{width:4px}
+.full-page::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:2px}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.page-header-text h2{font-size:20px;font-weight:700;color:var(--gray-900);margin-bottom:4px}
+.page-header-text p{font-size:13px;color:var(--gray-500)}
+
+/* ── CARD ── */
+.card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.card.accent{border-color:var(--blue-100);background:var(--blue-50)}
+.card.danger{border-color:var(--red-100)}
+.card-title{font-size:13px;font-weight:600;color:var(--gray-800);margin-bottom:14px}
+
+/* ── ENDPOINT LIST ── */
+.ep-item{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow-sm);transition:border-color .12s}
+.ep-item:hover{border-color:var(--gray-300)}
+.ep-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ep-status-dot.active{background:var(--green-500);box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.ep-status-dot.inactive{background:var(--gray-300)}
+.ep-info{flex:1}
+.ep-name{font-size:13px;font-weight:600;color:var(--gray-800);margin-bottom:3px}
+.ep-url{font-family:var(--mono);font-size:11px;color:var(--gray-400)}
+.ep-stats{display:flex;gap:24px;text-align:center}
+.ep-stat-val{font-size:16px;font-weight:700;font-family:var(--mono);color:var(--gray-800);display:block}
+.ep-stat-lbl{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.4px}
+.ep-actions{display:flex;gap:8px}
+
+/* URL BOX */
+.url-display{display:flex;align-items:center;gap:10px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:10px 14px;margin:10px 0}
+.url-text{font-family:var(--mono);font-size:13px;color:var(--blue-600);flex:1;word-break:break-all;font-weight:500}
+
+/* CURL PREVIEW */
+.curl-preview{background:var(--gray-900);border-radius:var(--radius);padding:12px 14px;font-family:var(--mono);font-size:11px;color:#abb2bf;line-height:1.9;margin-top:8px}
+
+/* ── REPLAY ── */
+.replay-item{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-sm)}
+.replay-info{flex:1}
+.replay-event{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--gray-800);margin-bottom:3px}
+.replay-target{font-size:11px;color:var(--gray-500)}
+.replay-result{font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.replay-result.ok{background:var(--green-100);color:var(--green-600)}
+.replay-result.err{background:var(--red-100);color:var(--red-600)}
+.replay-result.warn{background:var(--amber-100);color:var(--amber-600)}
+.replay-age{font-size:11px;color:var(--gray-400);font-family:var(--mono)}
+
+/* ── ALERTS ── */
+.alert-item{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-sm)}
+.alert-info{flex:1}
+.alert-name{font-size:13px;font-weight:600;color:var(--gray-800);margin-bottom:3px}
+.alert-cond{font-family:var(--mono);font-size:11px;color:var(--gray-500)}
+
+/* TOGGLE */
+.toggle{position:relative;width:36px;height:20px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;border-radius:10px;background:var(--gray-200);cursor:pointer;transition:.2s}
+.toggle-track::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked+.toggle-track{background:var(--blue-500)}
+.toggle input:checked+.toggle-track::before{transform:translateX(16px)}
+
+/* ── NOTIFICATIONS ── */
+.notif-item{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--shadow-sm);transition:border-color .12s}
+.notif-item.unread{border-color:var(--blue-200);background:var(--blue-50)}
+.notif-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.notif-icon svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.notif-icon.webhook{background:var(--blue-100);color:var(--blue-600)}
+.notif-icon.alert{background:var(--amber-100);color:var(--amber-600)}
+.notif-icon.replay{background:var(--green-100);color:var(--green-600)}
+.notif-body{flex:1}
+.notif-title{font-size:13px;font-weight:600;color:var(--gray-800);margin-bottom:3px}
+.notif-sub{font-size:12px;color:var(--gray-500)}
+.notif-time{font-size:11px;color:var(--gray-400);font-family:var(--mono);flex-shrink:0;white-space:nowrap}
+.unread-dot{width:8px;height:8px;border-radius:50%;background:var(--blue-500);flex-shrink:0;margin-top:6px}
+
+/* ── SETTINGS ── */
+.settings-row{display:flex;align-items:center;padding:14px 0;border-bottom:1px solid var(--gray-100);gap:12px}
+.settings-row:last-child{border-bottom:none;padding-bottom:0}
+.settings-label{flex:1}
+.settings-label span{display:block;font-size:13px;font-weight:500;color:var(--gray-800);margin-bottom:2px}
+.settings-label small{font-size:11px;color:var(--gray-400)}
+.token-field{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:8px 12px;font-family:var(--mono);font-size:12px;color:var(--gray-500);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.input-field{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:7px 12px;font-size:13px;font-family:var(--sans);color:var(--gray-800);outline:none;transition:border-color .15s}
+.input-field:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,113,248,.1)}
+.select-field{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:7px 10px;font-size:13px;font-family:var(--sans);color:var(--gray-700);outline:none;transition:border-color .15s;cursor:pointer}
+.select-field:focus{border-color:var(--blue-500)}
+
+/* FORM GRID */
+.form-grid{display:grid;grid-template-columns:1fr 160px 130px auto;gap:10px;align-items:end}
+.form-label{font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+
+/* DIFF MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--white);border-radius:var(--radius-lg);width:660px;max-width:94vw;max-height:84vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow-lg);transform:translateY(10px);transition:transform .2s}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:10px}
+.modal-head h3{font-size:15px;font-weight:700;flex:1;color:var(--gray-900)}
+.modal-close{background:var(--gray-100);border:none;border-radius:var(--radius);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s;flex-shrink:0}
+.modal-close:hover{background:var(--gray-200)}
+.modal-close svg{width:14px;height:14px;stroke:var(--gray-600);fill:none;stroke-width:2;stroke-linecap:round}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.diff-legend{display:flex;gap:16px;margin-bottom:12px;font-size:11px}
+.diff-add{color:var(--green-600);background:var(--green-100);padding:2px 8px;border-radius:4px;font-family:var(--mono)}
+.diff-rem{color:var(--red-600);background:var(--red-100);padding:2px 8px;border-radius:4px;font-family:var(--mono);text-decoration:line-through}
+.diff-line-add{display:block;background:#f0fdf4;border-left:3px solid var(--green-400);padding:1px 8px;color:var(--green-700);font-family:var(--mono);font-size:12px;line-height:1.8}
+.diff-line-rem{display:block;background:#fff1f2;border-left:3px solid var(--red-400);padding:1px 8px;color:var(--red-700);font-family:var(--mono);font-size:12px;line-height:1.8;text-decoration:line-through}
+.diff-line-same{display:block;padding:1px 11px;color:var(--gray-500);font-family:var(--mono);font-size:12px;line-height:1.8}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:999;pointer-events:none}
+.toast-item{background:var(--gray-900);color:#fff;border-radius:var(--radius);padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:9px;pointer-events:none;box-shadow:var(--shadow-lg);animation:toastIn .2s ease forwards}
+.toast-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.toast-item.success svg{color:var(--green-500)}
+.toast-item.info svg{color:#60a5fa}
+.toast-item.error svg{color:var(--red-500)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(6px)}}
+
+/* EMPTY STATE */
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--gray-400);padding:40px}
+.empty-state svg{width:52px;height:52px;stroke:currentColor;fill:none;stroke-width:1;opacity:.35}
+.empty-state h3{font-size:15px;font-weight:600;color:var(--gray-500)}
+.empty-state p{font-size:13px;text-align:center;max-width:260px;line-height:1.7}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .ev-panel{width:100%}
+  .det-panel{display:none}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .meta-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="logo-area">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </div>
+    <span class="logo-text">WebhookInbox</span>
+    <span class="logo-version">v1.0</span>
+  </div>
+
+  <nav class="nav-wrap">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+      <span class="nav-badge blue" id="nav-cnt">12</span>
+    </div>
+    <div class="nav-item" id="nav-endpoints" onclick="showPage('endpoints',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+      Endpoints
+      <span class="nav-badge blue">3</span>
+    </div>
+    <div class="nav-item" id="nav-replay" onclick="showPage('replay',this)">
+      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+      Replay Center
+    </div>
+
+    <div class="nav-label">Monitoring</div>
+    <div class="nav-item" id="nav-alerts" onclick="showPage('alerts',this)">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Alert Rules
+      <span class="nav-badge red">2</span>
+    </div>
+    <div class="nav-item" id="nav-notifications" onclick="showPage('notifications',this)">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><circle cx="12" cy="3" r="1"/></svg>
+      Notifications
+      <span class="nav-badge amber">5</span>
+    </div>
+
+    <div class="nav-label">Account</div>
+    <div class="nav-item" id="nav-settings" onclick="showPage('settings',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      Settings
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="avatar">JD</div>
+      <div>
+        <div class="user-name">Jean Dupont</div>
+        <div class="user-plan">Pro Plan</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <span class="page-title" id="page-title">Dashboard</span>
+    <div class="topbar-gap"></div>
+    <div class="live-badge"><div class="live-dot"></div>Live polling</div>
+    <button class="btn primary" onclick="simulateWebhook()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Simulate Webhook
+    </button>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ════════════════════════════════════
+         PAGE 1: DASHBOARD
+    ════════════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card blue">
+          <div class="stat-value" id="stat-total">12</div>
+          <div class="stat-label">Total Events</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-value" id="stat-ok">10</div>
+          <div class="stat-label">Successful</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-value" id="stat-fail">2</div>
+          <div class="stat-label">Failed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">1.4</div>
+          <div class="stat-label">Events / min</div>
+        </div>
+      </div>
+
+      <div class="split-view">
+        <!-- Left: event list -->
+        <div class="ev-panel">
+          <div class="filter-row">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" id="search-q" placeholder="Search events…" oninput="filterEvents()">
+            </div>
+            <select class="filter-sel" id="filter-status" onchange="filterEvents()">
+              <option value="">All status</option>
+              <option value="success">Success</option>
+              <option value="failed">Failed</option>
+              <option value="pending">Pending</option>
+            </select>
+            <select class="filter-sel" id="filter-type" onchange="filterEvents()">
+              <option value="">All types</option>
+              <option value="payment">payment</option>
+              <option value="order">order</option>
+              <option value="user">user</option>
+              <option value="subscription">subscription</option>
+            </select>
+          </div>
+          <div class="ev-list" id="ev-list"></div>
+        </div>
+
+        <!-- Right: detail -->
+        <div class="det-panel">
+          <div class="det-empty" id="det-empty">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
+            <p>Select an event to inspect its payload</p>
+          </div>
+          <div id="det-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0">
+            <div class="det-topbar">
+              <span class="badge" id="det-badge">success</span>
+              <span class="det-type" id="det-type">payment.succeeded</span>
+              <div class="det-actions">
+                <button class="btn sm" onclick="openDiff()">
+                  <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  Diff
+                </button>
+                <button class="btn sm" onclick="copyCurl()">
+                  <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  cURL
+                </button>
+                <button class="btn sm primary" onclick="replayEvent()">
+                  <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+                  Replay
+                </button>
+              </div>
+            </div>
+            <div class="tabs-bar">
+              <div class="tab-item active" onclick="switchTab('payload',this)">Payload</div>
+              <div class="tab-item" onclick="switchTab('headers',this)">Headers</div>
+              <div class="tab-item" onclick="switchTab('metadata',this)">Metadata</div>
+            </div>
+            <div class="det-body" id="det-body"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         PAGE 2: ENDPOINTS
+    ════════════════════════════════════ -->
+    <div class="page" id="page-endpoints">
+      <div class="full-page">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h2>Endpoints</h2>
+            <p>Unique URLs that receive your webhooks. Each endpoint is completely isolated.</p>
+          </div>
+          <button class="btn primary" onclick="toast('Endpoint created!','success')">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Endpoint
+          </button>
+        </div>
+
+        <div class="card accent">
+          <div class="card-title" style="color:#1e4bc8">Primary Endpoint URL</div>
+          <div class="url-display">
+            <span class="url-text">https://api.webhookinbox.dev/hook/abc123xyz</span>
+            <button class="btn sm" onclick="copyText('https://api.webhookinbox.dev/hook/abc123xyz')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <div style="font-size:12px;color:var(--gray-500);margin-bottom:6px">Send your webhooks here to inspect them:</div>
+          <div class="curl-preview">
+            <span style="color:#c678dd">curl</span> -X POST https://api.webhookinbox.dev/hook/abc123xyz \<br>
+            &nbsp;&nbsp;-H <span style="color:#98c379">"Content-Type: application/json"</span> \<br>
+            &nbsp;&nbsp;-d <span style="color:#98c379">'{"event":"test.ping","data":{"hello":"world"}}'</span>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-bottom:12px">All Endpoints</div>
+        <div id="ep-list-render"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         PAGE 3: REPLAY CENTER
+    ════════════════════════════════════ -->
+    <div class="page" id="page-replay">
+      <div class="full-page">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h2>Replay Center</h2>
+            <p>Re-send past webhooks to any target URL and inspect the HTTP response.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Send replay to target</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input class="input-field" id="replay-url" placeholder="https://your-app.com/webhook" style="flex:1">
+            <select class="select-field" id="replay-event-sel">
+              <option value="">Select event…</option>
+            </select>
+            <button class="btn primary" onclick="toast('Replay sent → 200 OK ✓','success')">
+              <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+              Send Replay
+            </button>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-bottom:12px">Replay History</div>
+        <div id="replay-list-render"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         PAGE 4: ALERT RULES
+    ════════════════════════════════════ -->
+    <div class="page" id="page-alerts">
+      <div class="full-page">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h2>Alert Rules</h2>
+            <p>Get notified when a webhook matches specific field conditions.</p>
+          </div>
+          <button class="btn primary" onclick="toast('Alert rule created!','success')">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Rule
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Create alert rule</div>
+          <div class="form-grid">
+            <div>
+              <div class="form-label">JSON field path</div>
+              <input class="input-field" style="width:100%" placeholder="e.g. data.amount">
+            </div>
+            <div>
+              <div class="form-label">Condition</div>
+              <select class="select-field" style="width:100%">
+                <option>greater than</option>
+                <option>less than</option>
+                <option>equals</option>
+                <option>contains</option>
+                <option>exists</option>
+              </select>
+            </div>
+            <div>
+              <div class="form-label">Value</div>
+              <input class="input-field" style="width:100%" placeholder="1000">
+            </div>
+            <div>
+              <div class="form-label" style="opacity:0">Save</div>
+              <button class="btn primary" style="width:100%" onclick="toast('Rule saved!','success')">Save Rule</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-bottom:12px">Active Rules</div>
+        <div id="alert-list-render"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         PAGE 5: NOTIFICATIONS
+    ════════════════════════════════════ -->
+    <div class="page" id="page-notifications">
+      <div class="full-page">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h2>Notifications</h2>
+            <p>In-app activity feed and triggered alert history.</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;color:var(--gray-600)">All notifications</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div></label>
+          </div>
+        </div>
+        <div id="notif-list-render"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         PAGE 6: SETTINGS
+    ════════════════════════════════════ -->
+    <div class="page" id="page-settings">
+      <div class="full-page">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h2>Settings</h2>
+            <p>Manage workspace preferences, API access, and data retention.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Workspace</div>
+          <div class="settings-row">
+            <div class="settings-label"><span>Workspace name</span><small>Used in URLs and shared links</small></div>
+            <input class="input-field" value="My Workspace" style="width:220px">
+            <button class="btn sm" onclick="toast('Saved!','success')">Save</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label"><span>Retention period</span><small>How long events are kept in the database</small></div>
+            <select class="select-field"><option>30 days</option><option>7 days</option><option>90 days</option></select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label"><span>Polling interval</span><small>How often the dashboard checks for new events</small></div>
+            <select class="select-field"><option>3 seconds</option><option>5 seconds</option><option>10 seconds</option></select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label"><span>Auto-purge via cron</span><small>Runs nightly at 02:00 UTC, removes expired events</small></div>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">API Token</div>
+          <div class="settings-row">
+            <div class="settings-label"><span>Auth token</span><small>Send as: Authorization: Bearer &lt;token&gt;</small></div>
+            <div class="token-field">wi_live_4f7e9c2a1b8d3e6f•••••••••••••••</div>
+            <button class="btn sm" onclick="copyText('wi_live_4f7e9c2a1b8d3e6f_xK9mP2')">Copy</button>
+            <button class="btn sm" onclick="toast('Token regenerated','info')">Regenerate</button>
+          </div>
+        </div>
+
+        <div class="card danger">
+          <div class="card-title" style="color:var(--red-600)">Danger Zone</div>
+          <div class="settings-row">
+            <div class="settings-label"><span>Purge all events</span><small>Permanently deletes all webhook history from the database</small></div>
+            <button class="btn sm danger" onclick="toast('All events purged','info')">Purge All</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label"><span>Delete workspace</span><small>Irreversible — removes all endpoints, events, and settings</small></div>
+            <button class="btn sm danger" onclick="toast('Workspace deleted','error')">Delete Workspace</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end content-area -->
+</main>
+</div><!-- end app -->
+
+<!-- DIFF MODAL -->
+<div class="modal-overlay" id="diff-modal" onclick="closeDiff()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h3>Payload Diff — current vs previous event</h3>
+      <button class="modal-close" onclick="closeDiff()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="diff-legend">
+        <span class="diff-add">+ added / changed</span>
+        <span class="diff-rem">- removed / old</span>
+        <span style="font-size:11px;color:var(--gray-400);padding:2px 8px;background:var(--gray-100);border-radius:4px;font-family:var(--mono)">unchanged</span>
+      </div>
+      <div class="code-wrap">
+        <div class="code-body" id="diff-content" style="max-height:400px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ══ DATA ══════════════════════════════════════════════════════════════════
+var EVENTS = [
+  {id:'evt_001',type:'payment.succeeded',status:'success',source:'Stripe',ip:'52.18.10.4',ts:'2025-05-21T10:42:11Z',ep:'abc123xyz',
+   payload:{id:'pi_3PQ5x2HZ2',object:'payment_intent',amount:4999,currency:'eur',status:'succeeded',customer:'cus_Qa1B2C',metadata:{order_id:'ORD-2291',plan:'pro'},created:1747823531}},
+  {id:'evt_002',type:'order.created',status:'success',source:'Shopify',ip:'23.227.38.65',ts:'2025-05-21T10:39:05Z',ep:'abc123xyz',
+   payload:{id:'ORDER-8821',number:8821,email:'alice@example.com',total_price:'129.99',currency:'EUR',financial_status:'paid',line_items:[{title:'Pro Plan',quantity:1,price:'129.99'}]}},
+  {id:'evt_003',type:'user.signup',status:'success',source:'Auth0',ip:'34.203.15.22',ts:'2025-05-21T10:35:44Z',ep:'def456uvw',
+   payload:{event:'signup',user_id:'auth0|6456a1b2',email:'bob@example.com',name:'Bob Martin',app:'dashboard',verified:true}},
+  {id:'evt_004',type:'payment.failed',status:'failed',source:'Stripe',ip:'52.18.10.4',ts:'2025-05-21T10:31:22Z',ep:'abc123xyz',
+   payload:{id:'pi_3PQ5ERR3',object:'payment_intent',amount:9900,currency:'eur',status:'requires_payment_method',last_payment_error:{code:'card_declined',message:'Your card was declined.',decline_code:'insufficient_funds'}}},
+  {id:'evt_005',type:'subscription.renewed',status:'success',source:'Stripe',ip:'52.18.10.4',ts:'2025-05-21T10:28:10Z',ep:'abc123xyz',
+   payload:{id:'sub_1PQ7a3HZ2',object:'subscription',status:'active',plan:{id:'plan_pro',nickname:'Pro Monthly',amount:4999,interval:'month'},current_period_end:1750501690}},
+  {id:'evt_006',type:'order.cancelled',status:'failed',source:'WooCommerce',ip:'203.0.113.8',ts:'2025-05-21T10:22:38Z',ep:'ghi789rst',
+   payload:{id:'WC-1122',status:'cancelled',reason:'customer_request',total:'59.90',refund_amount:'59.90'}},
+  {id:'evt_007',type:'user.updated',status:'success',source:'Auth0',ip:'34.203.15.22',ts:'2025-05-21T10:18:55Z',ep:'def456uvw',
+   payload:{event:'user_updated',user_id:'auth0|5321b2c3',changes:{email:{old:'old@ex.com',new:'new@ex.com'}}}},
+  {id:'evt_008',type:'payment.refunded',status:'pending',source:'Stripe',ip:'52.18.10.4',ts:'2025-05-21T10:10:01Z',ep:'abc123xyz',
+   payload:{id:'re_3PQ5x2HZ4',object:'refund',amount:2500,currency:'eur',status:'pending',reason:'requested_by_customer'}},
+  {id:'evt_009',type:'subscription.cancelled',status:'success',source:'Paddle',ip:'34.91.4.202',ts:'2025-05-21T10:05:17Z',ep:'abc123xyz',
+   payload:{alert_name:'subscription_cancelled',subscription_id:'4921882',user_id:'42481',cancellation_effective_date:'2025-06-21',sale_gross:'49.00'}},
+  {id:'evt_010',type:'order.shipped',status:'success',source:'Shopify',ip:'23.227.38.65',ts:'2025-05-21T09:58:44Z',ep:'abc123xyz',
+   payload:{id:'SHIP-5512',order_id:'ORDER-8820',tracking_number:'1Z999AA101',carrier:'UPS',estimated_delivery:'2025-05-23'}},
+  {id:'evt_011',type:'user.deleted',status:'failed',source:'Auth0',ip:'34.203.15.22',ts:'2025-05-21T09:45:33Z',ep:'def456uvw',
+   payload:{event:'delete_user',user_id:'auth0|9988ff',reason:'gdpr_request',error:'permission_denied'}},
+  {id:'evt_012',type:'payment.pending',status:'pending',source:'Stripe',ip:'52.18.10.4',ts:'2025-05-21T09:30:00Z',ep:'abc123xyz',
+   payload:{id:'pi_3PQ5xPEND',object:'payment_intent',amount:1499,currency:'eur',status:'processing',payment_method:'pm_sepa_debit'}},
+];
+
+var ENDPOINTS_DATA = [
+  {id:'abc123xyz',name:'Stripe Production',status:'active',events:8,last:'2m ago'},
+  {id:'def456uvw',name:'Auth0 Webhooks',status:'active',events:3,last:'7m ago'},
+  {id:'ghi789rst',name:'WooCommerce Store',status:'inactive',events:1,last:'45m ago'},
+];
+
+var REPLAYS_DATA = [
+  {ev:'payment.succeeded',id:'evt_001',target:'https://staging.myapp.com/hooks',res:'200 OK',cls:'ok',age:'2m ago'},
+  {ev:'order.created',id:'evt_002',target:'https://localhost:3000/webhook',res:'200 OK',cls:'ok',age:'15m ago'},
+  {ev:'payment.failed',id:'evt_004',target:'https://staging.myapp.com/hooks',res:'500 Error',cls:'err',age:'32m ago'},
+  {ev:'user.signup',id:'evt_003',target:'https://staging.myapp.com/hooks',res:'404 Not Found',cls:'warn',age:'1h ago'},
+];
+
+var ALERTS_DATA = [
+  {name:'High Value Payment',cond:'data.amount > 5000',ev:'payment.*',on:true},
+  {name:'Payment Failure',cond:'status === "failed"',ev:'payment.failed',on:true},
+  {name:'New User Signups',cond:'event === "signup"',ev:'user.signup',on:false},
+];
+
+var NOTIFS_DATA = [
+  {type:'webhook',title:'New webhook received',sub:'payment.succeeded · Stripe · evt_001',age:'2m ago',unread:true},
+  {type:'alert',title:'Alert triggered: High Value Payment',sub:'data.amount = 4999 on payment.succeeded',age:'2m ago',unread:true},
+  {type:'replay',title:'Replay completed successfully',sub:'evt_002 → 200 OK · staging.myapp.com',age:'15m ago',unread:false},
+  {type:'alert',title:'Alert triggered: Payment Failure',sub:'payment.failed · card_declined',age:'32m ago',unread:false},
+  {type:'webhook',title:'Replay failed',sub:'evt_004 → 500 Internal Server Error',age:'32m ago',unread:false},
+];
+
+var MOCK_HEADERS = {
+  'content-type':'application/json; charset=utf-8',
+  'x-webhook-id':'__ID__',
+  'x-webhook-timestamp':'__TS__',
+  'x-webhook-signature':'sha256=a8b9c2d1e3f40912abc45678def...',
+  'user-agent':'Stripe/1.0 (+https://stripe.com/docs/webhooks)',
+  'x-forwarded-for':'__IP__',
+  'accept':'*/*',
+  'content-length':'__LEN__',
+};
+
+// ══ STATE ══════════════════════════════════════════════════════════════════
+var evList = EVENTS.slice();
+var selectedEv = null;
+var currentTab = 'payload';
+
+// ══ PAGE NAVIGATION ════════════════════════════════════════════════════════
+var PAGE_TITLES = {
+  dashboard:'Dashboard',endpoints:'Endpoints',replay:'Replay Center',
+  alerts:'Alert Rules',notifications:'Notifications',settings:'Settings'
+};
+function showPage(name, navEl) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  var pg = document.getElementById('page-'+name);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[name] || name;
+  if (name === 'endpoints') renderEndpoints();
+  if (name === 'replay') renderReplays();
+  if (name === 'alerts') renderAlerts();
+  if (name === 'notifications') renderNotifications();
+}
+
+// ══ EVENT LIST ════════════════════════════════════════════════════════════
+function renderEventList(list) {
+  var c = document.getElementById('ev-list');
+  if (!list.length) {
+    c.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg><h3>No events found</h3><p>Try adjusting your filters or simulate a new webhook.</p></div>';
+    return;
+  }
+  c.innerHTML = list.map(function(ev) {
+    var isSel = selectedEv && selectedEv.id === ev.id;
+    return '<div class="ev-item'+(isSel?' selected':'')+'" onclick="selectEvent(\''+ev.id+'\')">'+
+      '<div class="ev-row1">'+
+      '<span class="ev-type">'+ev.type+'</span>'+
+      '<span class="badge '+ev.status+'">'+ev.status+'</span>'+
+      '</div>'+
+      '<div class="ev-row2">'+
+      '<span class="ev-src">'+ev.source+'</span>'+
+      '<span>·</span>'+
+      '<span class="ev-id">'+ev.id+'</span>'+
+      '<span class="ev-time">'+timeAgo(ev.ts)+'</span>'+
+      '</div>'+
+      '</div>';
+  }).join('');
+}
+
+function filterEvents() {
+  var q = document.getElementById('search-q').value.toLowerCase();
+  var fs = document.getElementById('filter-status').value;
+  var ft = document.getElementById('filter-type').value;
+  var res = evList.filter(function(ev) {
+    return (!q || ev.type.toLowerCase().includes(q) || ev.id.toLowerCase().includes(q) || ev.source.toLowerCase().includes(q)) &&
+           (!fs || ev.status === fs) &&
+           (!ft || ev.type.startsWith(ft));
+  });
+  renderEventList(res);
+}
+
+function selectEvent(id) {
+  selectedEv = evList.find(function(e){ return e.id === id; });
+  if (!selectedEv) return;
+  filterEvents();
+  document.getElementById('det-empty').style.display = 'none';
+  var dv = document.getElementById('det-view');
+  dv.style.display = 'flex';
+  document.getElementById('det-type').textContent = selectedEv.type;
+  var b = document.getElementById('det-badge');
+  b.className = 'badge '+selectedEv.status;
+  b.textContent = selectedEv.status;
+  switchTab(currentTab, document.querySelector('.tab-item.active'));
+}
+
+// ══ TABS ════════════════════════════════════════════════════════════════════
+function switchTab(tab, clickedEl) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-item').forEach(function(t){ t.classList.remove('active'); });
+  if (clickedEl) clickedEl.classList.add('active');
+  if (!selectedEv) return;
+  var body = document.getElementById('det-body');
+
+  if (tab === 'payload') {
+    body.innerHTML =
+      '<div class="section-head">JSON Payload</div>'+
+      '<div class="code-wrap">'+
+        '<div class="code-header">'+
+          '<span class="code-header-text" style="color:#98c379">'+selectedEv.type+'</span>'+
+          '<span class="code-header-text" style="margin-left:auto">'+selectedEv.ts+'</span>'+
+          '<button class="btn sm" style="margin-left:10px;color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)" onclick="copyText(JSON.stringify(selectedEv.payload,null,2))">Copy JSON</button>'+
+        '</div>'+
+        '<div class="code-body">'+syntaxHL(selectedEv.payload)+'</div>'+
+      '</div>';
+  } else if (tab === 'headers') {
+    var h = Object.assign({}, MOCK_HEADERS);
+    h['x-webhook-id'] = selectedEv.id;
+    h['x-webhook-timestamp'] = selectedEv.ts;
+    h['x-forwarded-for'] = selectedEv.ip;
+    h['content-length'] = ''+JSON.stringify(selectedEv.payload).length;
+    body.innerHTML =
+      '<div class="section-head">HTTP Request Headers</div>'+
+      '<table class="headers-table">'+
+      Object.keys(h).map(function(k){ return '<tr><td>'+k+'</td><td>'+h[k]+'</td></tr>'; }).join('')+
+      '</table>';
+  } else {
+    body.innerHTML =
+      '<div class="section-head">Event Metadata</div>'+
+      '<div class="meta-grid">'+
+      mc('Event ID', selectedEv.id)+
+      mc('Status', '<span style="color:'+statusCol(selectedEv.status)+'">'+selectedEv.status+'</span>')+
+      mc('Source IP', selectedEv.ip)+
+      mc('Source / Provider', selectedEv.source)+
+      mc('Endpoint ID', selectedEv.ep)+
+      mc('Payload size', JSON.stringify(selectedEv.payload).length+' bytes')+
+      '</div>'+
+      '<div class="meta-card" style="grid-column:1/-1"><div class="meta-label">Timestamp (ISO 8601)</div><div class="meta-value">'+selectedEv.ts+'</div></div>';
+  }
+}
+
+function mc(label, val) {
+  return '<div class="meta-card"><div class="meta-label">'+label+'</div><div class="meta-value">'+val+'</div></div>';
+}
+function statusCol(s){ return s==='success'?'var(--green-600)':s==='failed'?'var(--red-600)':'var(--amber-600)'; }
+
+// ══ SYNTAX HIGHLIGHT ════════════════════════════════════════════════════════
+function syntaxHL(obj) {
+  function w(v, d) {
+    var p = Array(d+1).join('  ');
+    var p1 = Array(d+2).join('  ');
+    if (v === null) return '<span class="jnull">null</span>';
+    if (typeof v === 'boolean') return '<span class="jb">'+v+'</span>';
+    if (typeof v === 'number') return '<span class="jn">'+v+'</span>';
+    if (typeof v === 'string') return '<span class="js">"'+esc(v)+'"</span>';
+    if (Array.isArray(v)) {
+      if (!v.length) return '[]';
+      return '[\n'+v.map(function(x){ return p1+w(x,d+1); }).join(',\n')+'\n'+p+']';
+    }
+    var keys = Object.keys(v);
+    if (!keys.length) return '{}';
+    return '{\n'+keys.map(function(k){ return p1+'<span class="jk">"'+k+'"</span>: '+w(v[k],d+1); }).join(',\n')+'\n'+p+'}';
+  }
+  return '<pre style="margin:0;color:#abb2bf">'+w(obj,0)+'</pre>';
+}
+function esc(s){ return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ══ ENDPOINTS ═══════════════════════════════════════════════════════════════
+function renderEndpoints() {
+  document.getElementById('ep-list-render').innerHTML = ENDPOINTS_DATA.map(function(ep) {
+    return '<div class="ep-item">'+
+      '<div class="ep-status-dot '+(ep.status==='active'?'active':'inactive')+'"></div>'+
+      '<div class="ep-info">'+
+        '<div class="ep-name">'+ep.name+'</div>'+
+        '<div class="ep-url">https://api.webhookinbox.dev/hook/'+ep.id+'</div>'+
+      '</div>'+
+      '<div class="ep-stats">'+
+        '<div><span class="ep-stat-val">'+ep.events+'</span><span class="ep-stat-lbl">events</span></div>'+
+        '<div><span class="ep-stat-val">'+ep.last+'</span><span class="ep-stat-lbl">last seen</span></div>'+
+      '</div>'+
+      '<div class="ep-actions">'+
+        '<button class="btn sm" onclick="copyText(\'https://api.webhookinbox.dev/hook/'+ep.id+'\')">Copy URL</button>'+
+        '<button class="btn sm" onclick="toast(\''+(ep.status==='active'?'Endpoint paused':'Endpoint activated')+'\',\'info\')">'+(ep.status==='active'?'Pause':'Activate')+'</button>'+
+      '</div>'+
+      '</div>';
+  }).join('');
+}
+
+// ══ REPLAYS ═════════════════════════════════════════════════════════════════
+function renderReplays() {
+  var sel = document.getElementById('replay-event-sel');
+  if (sel && sel.options.length === 1) {
+    evList.forEach(function(ev) {
+      var opt = document.createElement('option');
+      opt.value = ev.id;
+      opt.textContent = ev.type + ' · ' + ev.id;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('replay-list-render').innerHTML = REPLAYS_DATA.map(function(r) {
+    return '<div class="replay-item">'+
+      '<div class="replay-info">'+
+        '<div class="replay-event">'+r.ev+' · '+r.id+'</div>'+
+        '<div class="replay-target">→ '+r.target+'</div>'+
+      '</div>'+
+      '<span class="replay-result '+r.cls+'">'+r.res+'</span>'+
+      '<span class="replay-age">'+r.age+'</span>'+
+      '<button class="btn sm" onclick="toast(\'Replaying '+r.id+'…\',\'info\')">Replay again</button>'+
+      '</div>';
+  }).join('');
+}
+
+// ══ ALERTS ══════════════════════════════════════════════════════════════════
+function renderAlerts() {
+  document.getElementById('alert-list-render').innerHTML = ALERTS_DATA.map(function(a,i) {
+    return '<div class="alert-item">'+
+      '<div class="alert-info">'+
+        '<div class="alert-name">'+a.name+'</div>'+
+        '<div class="alert-cond">'+a.ev+' — if '+a.cond+'</div>'+
+      '</div>'+
+      '<label class="toggle"><input type="checkbox" '+(a.on?'checked':'')+' onchange="ALERTS_DATA['+i+'].on=this.checked;toast(this.checked?\'Rule enabled\':\'Rule disabled\',\'info\')"><div class="toggle-track"></div></label>'+
+      '<button class="btn sm danger" onclick="toast(\'Rule deleted\',\'info\')">Delete</button>'+
+      '</div>';
+  }).join('');
+}
+
+// ══ NOTIFICATIONS ════════════════════════════════════════════════════════════
+function renderNotifications() {
+  var icons = {
+    webhook: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>',
+    alert: '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    replay: '<svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>',
+  };
+  document.getElementById('notif-list-render').innerHTML = NOTIFS_DATA.map(function(n) {
+    return '<div class="notif-item'+(n.unread?' unread':'')+'">'+
+      (n.unread?'<div class="unread-dot"></div>':'')+
+      '<div class="notif-icon '+n.type+'">'+icons[n.type]+'</div>'+
+      '<div class="notif-body">'+
+        '<div class="notif-title">'+n.title+'</div>'+
+        '<div class="notif-sub">'+n.sub+'</div>'+
+      '</div>'+
+      '<div class="notif-time">'+n.age+'</div>'+
+      '</div>';
+  }).join('');
+}
+
+// ══ ACTIONS ══════════════════════════════════════════════════════════════════
+function copyCurl() {
+  if (!selectedEv) return;
+  var curl = 'curl -X POST https://api.webhookinbox.dev/hook/'+selectedEv.ep+
+    ' \\\n  -H "Content-Type: application/json" \\\n  -H "x-webhook-id: '+selectedEv.id+
+    '" \\\n  -d \''+JSON.stringify(selectedEv.payload)+'\'';
+  copyText(curl);
+}
+function replayEvent() {
+  if (!selectedEv) return;
+  toast('Replaying '+selectedEv.id+' → 200 OK','success');
+}
+function copyText(t) {
+  try { navigator.clipboard.writeText(t); } catch(e){}
+  toast('Copied to clipboard','success');
+}
+
+function simulateWebhook() {
+  var types = ['payment.succeeded','order.created','user.signup','subscription.renewed','payment.failed','order.shipped'];
+  var sources = ['Stripe','Shopify','Auth0','Paddle','WooCommerce'];
+  var statuses = ['success','success','success','failed','pending'];
+  var i = Math.floor(Math.random()*types.length);
+  var si = Math.floor(Math.random()*statuses.length);
+  var nw = {
+    id: 'evt_'+Math.random().toString(36).substr(2,6).toUpperCase(),
+    type: types[i], status: statuses[si],
+    source: sources[Math.floor(Math.random()*sources.length)],
+    ip: '34.'+Math.floor(Math.random()*200)+'.1.'+Math.floor(Math.random()*200),
+    ts: new Date().toISOString(), ep: 'abc123xyz',
+    payload: {event:types[i], id:'mock_'+Math.random().toString(36).substr(2,8),
+      amount:Math.floor(Math.random()*9900)+100, currency:'eur', timestamp:new Date().toISOString()}
+  };
+  evList.unshift(nw);
+  var total = evList.length;
+  var ok = evList.filter(function(e){ return e.status==='success'; }).length;
+  var fail = evList.filter(function(e){ return e.status==='failed'; }).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-ok').textContent = ok;
+  document.getElementById('stat-fail').textContent = fail;
+  document.getElementById('nav-cnt').textContent = total;
+  filterEvents();
+  toast('New event: '+nw.type,'info');
+}
+
+function openDiff() {
+  if (!selectedEv) return;
+  var idx = evList.indexOf(selectedEv);
+  var prev = evList[idx+1];
+  var content = document.getElementById('diff-content');
+  if (!prev) {
+    content.innerHTML = '<span style="color:var(--gray-400);font-family:var(--mono);font-size:13px">No previous event available for comparison.</span>';
+  } else {
+    var curr = JSON.stringify(selectedEv.payload, null, 2).split('\n');
+    var old  = JSON.stringify(prev.payload, null, 2).split('\n');
+    var max = Math.max(curr.length, old.length);
+    var lines = [];
+    for (var j=0; j<max; j++) {
+      if (j >= old.length) lines.push('<span class="diff-line-add">+ '+esc(curr[j])+'</span>');
+      else if (j >= curr.length) lines.push('<span class="diff-line-rem">- '+esc(old[j])+'</span>');
+      else if (curr[j] !== old[j]) {
+        lines.push('<span class="diff-line-rem">- '+esc(old[j])+'</span>');
+        lines.push('<span class="diff-line-add">+ '+esc(curr[j])+'</span>');
+      } else {
+        lines.push('<span class="diff-line-same">  '+esc(curr[j])+'</span>');
+      }
+    }
+    content.innerHTML = '<pre style="margin:0">'+lines.join('')+'</pre>';
+  }
+  document.getElementById('diff-modal').classList.add('open');
+}
+function closeDiff() { document.getElementById('diff-modal').classList.remove('open'); }
+
+// ══ TOAST ════════════════════════════════════════════════════════════════════
+var TOAST_ICONS = {
+  success: '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+  info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+  error: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+};
+function toast(msg, type) {
+  type = type || 'info';
+  var wrap = document.getElementById('toast-wrap');
+  var el = document.createElement('div');
+  el.className = 'toast-item '+type;
+  el.innerHTML = (TOAST_ICONS[type]||TOAST_ICONS.info)+msg;
+  wrap.appendChild(el);
+  setTimeout(function(){
+    el.style.animation = 'toastOut .2s ease forwards';
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 220);
+  }, 2800);
+}
+
+// ══ UTILS ════════════════════════════════════════════════════════════════════
+function timeAgo(ts) {
+  var diff = Math.floor((Date.now() - new Date(ts)) / 1000);
+  if (diff < 60) return diff+'s ago';
+  if (diff < 3600) return Math.floor(diff/60)+'m ago';
+  return Math.floor(diff/3600)+'h ago';
+}
+
+// ══ INIT ════════════════════════════════════════════════════════════════════
+renderEventList(evList);
+</script>
+</body>
+</html>
