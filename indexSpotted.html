@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f7f2ea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Spotted</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,600;1,9..144,700&family=Archivo:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+:root {
+  --paper:  #f7f2ea;
+  --white:  #ffffff;
+  --cream:  #ede6d8;
+  --line:   #ddd5c4;
+  --line2:  #ccc2ae;
+  --ink:    #1a1510;
+  --ink2:   #4a4035;
+  --ink3:   #7a6e60;
+  --ink4:   #a89e8e;
+  --ink5:   #c8bfb0;
+  --green:  #2d5a3d;
+  --green-l:rgba(45,90,61,0.09);
+  --green-b:rgba(45,90,61,0.2);
+  --fire:   #c4431a;
+  --st: env(safe-area-inset-top, 0px);
+  --sb: env(safe-area-inset-bottom, 0px);
+}
+
+html { height: 100%; background: #e0d8c8; display: flex; justify-content: center; }
+
+body {
+  width: 100%; max-width: 430px; height: 100dvh;
+  background: var(--paper); color: var(--ink);
+  font-family: 'Archivo', sans-serif;
+  overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 0 0 1px var(--line), 0 20px 80px rgba(0,0,0,0.15);
+}
+
+/* TOP BAR */
+#topbar {
+  flex-shrink: 0;
+  padding: calc(var(--st) + 10px) 18px 10px;
+  background: rgba(247,242,234,0.97);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 8px; }
+.logo-mark {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: var(--green);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.logo-mark svg { width: 12px; }
+.logo-name {
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 20px; font-weight: 700; letter-spacing: -0.3px; color: var(--ink); line-height: 1;
+}
+.tb-right { display: flex; align-items: center; gap: 10px; }
+.tb-edition { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink4); letter-spacing: 1px; text-transform: uppercase; }
+.tb-pips { display: flex; gap: 4px; align-items: center; }
+.pip { width: 18px; height: 3px; border-radius: 2px; background: var(--line2); transition: background 0.3s; }
+.pip.done { background: var(--green); }
+.pip.cur  { background: rgba(45,90,61,0.4); }
+
+/* SCROLL — CSS snap */
+#scroll-wrap {
+  flex: 1;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+#scroll-wrap::-webkit-scrollbar { display: none; }
+#scroll-wrap { scrollbar-width: none; }
+
+/* CARD */
+.card {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex; flex-direction: column;
+  background: var(--paper);
+  position: relative; overflow: hidden;
+}
+
+/* PHOTO */
+.card-photo { position: relative; overflow: hidden; flex-shrink: 0; }
+.card-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center top; display: block;
+}
+.card-photo-fade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 35%, rgba(247,242,234,0.7) 65%, var(--paper) 100%);
+}
+.card-badge {
+  position: absolute; top: 14px; left: 16px;
+  background: var(--green); color: #fff;
+  font-family: 'DM Mono', monospace; font-size: 8px; font-weight: 700;
+  letter-spacing: 1.4px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 3px;
+  display: flex; align-items: center; gap: 5px; z-index: 2;
+}
+.card-badge svg { width: 8px; }
+.card-num {
+  position: absolute; top: 14px; right: 16px;
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 12px; color: rgba(26,21,16,0.3); z-index: 2;
+}
+
+/* BODY */
+.card-body { flex: 1; padding: 12px 18px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+.card-identity { display: flex; align-items: center; gap: 12px; }
+.card-avatar {
+  width: 48px; height: 48px; border-radius: 12px;
+  border: 2px solid var(--green-b); overflow: hidden;
+  flex-shrink: 0; background: var(--cream);
+}
+.card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.card-name { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 800; line-height: 1.1; color: var(--ink); margin-bottom: 2px; }
+.card-handle { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink3); display: flex; align-items: center; gap: 5px; }
+.card-hdot { width: 3px; height: 3px; border-radius: 50%; background: var(--line2); }
+.card-followers { font-size: 10px; color: var(--ink4); margin-top: 2px; }
+.card-followers strong { color: var(--ink2); }
+
+.card-hook {
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 17px; font-weight: 500; line-height: 1.35; color: var(--ink);
+  border-left: 2px solid var(--green); padding-left: 12px;
+}
+
+.card-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.card-tag {
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 3px;
+  border: 1px solid var(--line2); color: var(--ink3); background: var(--white);
+}
+
+.card-note {
+  background: var(--white); border: 1px solid var(--line);
+  border-left: 2px solid var(--green);
+  border-radius: 0 12px 12px 0; padding: 10px 13px; flex: 1;
+}
+.card-note-lbl {
+  font-family: 'DM Mono', monospace; font-size: 8px; font-weight: 700;
+  letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+}
+.card-note-txt { font-size: 12px; color: var(--ink2); line-height: 1.6; }
+
+.card-cta { display: flex; gap: 8px; flex-shrink: 0; }
+.btn-visit {
+  flex: 1; height: 46px; border-radius: 11px; border: none;
+  background: var(--green); color: #fff;
+  font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: transform 0.12s, opacity 0.12s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-visit:active { transform: scale(0.97); opacity: 0.85; }
+.btn-save {
+  width: 46px; height: 46px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.12s; flex-shrink: 0;
+}
+.btn-save:active { background: var(--cream); }
+.btn-save svg { width: 17px; color: var(--ink4); transition: color 0.15s; }
+.btn-save.saved svg { color: var(--green); }
+
+/* swipe hint */
+.swipe-hint {
+  position: absolute; bottom: 76px; right: 16px; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  opacity: 0.3; pointer-events: none;
+  animation: floaty 2s ease-in-out infinite; transition: opacity 0.5s;
+}
+.swipe-hint svg { width: 14px; color: var(--ink3); }
+.swipe-hint span { font-size: 8px; color: var(--ink3); letter-spacing: 0.5px; font-family: 'DM Mono', monospace; }
+
+/* ══ END CARD ══ */
+.end-card {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--green);
+  padding: 28px 24px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.end-card::before {
+  content: 'SPOTTED';
+  position: absolute; font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 100px; font-weight: 900;
+  color: rgba(255,255,255,0.05);
+  white-space: nowrap; pointer-events: none;
+  top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-8deg);
+}
+
+/* mosaic */
+.end-mosaic {
+  display: grid; grid-template-columns: repeat(5,1fr);
+  gap: 3px; width: 100%; border-radius: 12px; overflow: hidden;
+  margin-bottom: 22px; position: relative; z-index: 2; flex-shrink: 0;
+}
+.end-mosaic-item { aspect-ratio: 1; overflow: hidden; position: relative; }
+.end-mosaic-item img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.75) saturate(0.6); }
+.end-mosaic-item::after { content:''; position: absolute; inset: 0; background: rgba(45,90,61,0.35); }
+
+/* check */
+.end-check {
+  width: 58px; height: 58px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.35);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px; position: relative; z-index: 2;
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+.end-check svg { width: 26px; color: #fff; }
+
+.end-title {
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-size: 26px; font-weight: 700;
+  color: #fff; line-height: 1.2; margin-bottom: 8px;
+  position: relative; z-index: 2;
+}
+.end-sub {
+  font-size: 13px; color: rgba(255,255,255,0.7);
+  line-height: 1.6; margin-bottom: 18px;
+  position: relative; z-index: 2;
+}
+
+.end-streak {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 6px 14px;
+  font-size: 13px; color: #fff; font-weight: 700;
+  margin-bottom: 16px; position: relative; z-index: 2;
+}
+
+.end-countdown {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px; padding: 14px 20px;
+  margin-bottom: 18px; width: 100%; position: relative; z-index: 2;
+}
+.end-countdown-lbl {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 6px;
+}
+.end-countdown-time {
+  font-family: 'DM Mono', monospace; font-size: 30px; font-weight: 500;
+  color: #fff; letter-spacing: 2px; line-height: 1;
+}
+
+.end-submit {
+  width: 100%; height: 46px; border-radius: 12px;
+  background: rgba(255,255,255,0.16); color: #fff;
+  font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.25);
+  transition: background 0.15s; position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-bottom: 10px;
+}
+.end-submit:active { background: rgba(255,255,255,0.26); }
+.end-submit svg { width: 14px; }
+
+.end-back {
+  font-size: 10px; color: rgba(255,255,255,0.4);
+  font-family: 'DM Mono', monospace; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 4px;
+  position: relative; z-index: 2;
+}
+.end-back svg { width: 11px; }
+
+/* TOAST */
+#toast {
+  position: fixed; top: 70px; left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  z-index: 300; background: var(--ink); color: var(--paper);
+  border-radius: 10px; padding: 10px 18px;
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  opacity: 0; transition: opacity 0.22s, transform 0.22s; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+@keyframes popIn  { from{transform:scale(0.4);opacity:0} to{transform:scale(1);opacity:1} }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 12 12" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="#fff" stroke-width="2"/>
+        <circle cx="6" cy="6" r="1.5" fill="#fff"/>
+      </svg>
+    </div>
+    <div class="logo-name">Spotted</div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-edition" id="tb-edition">Today</div>
+    <div class="tb-pips" id="tb-pips"></div>
+  </div>
+</div>
+
+<div id="scroll-wrap"></div>
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// CREATORS — edit this every day
+// picsum.photos gives reliable placeholder images
+// Replace photo/avatar URLs with real creator images
+// ══════════════════════════════════════
+const creators = [
+  {
+    id: 0,
+    name: "Mia Chen",
+    handle: "@miachen.art",
+    platform: "Instagram",
+    followers: "412",
+    tags: ["Illustration", "Minimalism"],
+    hook: "She draws the things we feel but can't say — in 3 lines.",
+    note: "Mia has been posting daily for 8 months with 412 followers. Every single piece stops your scroll. This is exactly the kind of talent that disappears into the noise.",
+    url: "https://instagram.com",
+    photo:  "https://picsum.photos/seed/mia/600/400",
+    avatar: "https://picsum.photos/seed/mia/100/100",
+  },
+  {
+    id: 1,
+    name: "Lucas Moreau",
+    handle: "@lucas.motion",
+    platform: "TikTok",
+    followers: "890",
+    tags: ["Motion Design", "Animation"],
+    hook: "His loops are so satisfying you'll watch them 40 times without realising.",
+    note: "Lucas works alone, renders at night, posts in the morning. No team. No budget. Just Blender and an obsession with making things move beautifully.",
+    url: "https://tiktok.com",
+    photo:  "https://picsum.photos/seed/lucas/600/400",
+    avatar: "https://picsum.photos/seed/lucas/100/100",
+  },
+  {
+    id: 2,
+    name: "Sophie Valentin",
+    handle: "@sophieceramics",
+    platform: "Instagram",
+    followers: "623",
+    tags: ["Ceramics", "Handmade"],
+    hook: "She makes things you want to hold before you even know what they are.",
+    note: "Every piece is made by hand in her Paris studio. She's not trying to scale. She's trying to make things that last. That's rarer than it sounds.",
+    url: "https://instagram.com",
+    photo:  "https://picsum.photos/seed/sophie/600/400",
+    avatar: "https://picsum.photos/seed/sophie/100/100",
+  },
+  {
+    id: 3,
+    name: "Emma Rojas",
+    handle: "@emmashootscities",
+    platform: "VSCO",
+    followers: "287",
+    tags: ["Photography", "Urban"],
+    hook: "Paris at 4am looks like a Tarkovsky film through her lens.",
+    note: "Emma wakes up at 3am twice a week to photograph Paris before it wakes. She has 287 followers. Every photo deserves 10,000.",
+    url: "https://vsco.co",
+    photo:  "https://picsum.photos/seed/emma/600/400",
+    avatar: "https://picsum.photos/seed/emma/100/100",
+  },
+  {
+    id: 4,
+    name: "Karim Belhaj",
+    handle: "@karimloops",
+    platform: "SoundCloud",
+    followers: "198",
+    tags: ["Music", "Lofi"],
+    hook: "One original track every day for 200 days. Not one skip.",
+    note: "Karim's challenge started as a creative exercise. He's on day 200. Some tracks are rough. Most are genuinely beautiful. All of them are honest.",
+    url: "https://soundcloud.com",
+    photo:  "https://picsum.photos/seed/karim/600/400",
+    avatar: "https://picsum.photos/seed/karim/100/100",
+  },
+];
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let streak  = 12;
+const saved = new Set();
+let seenAll = false;
+
+// ══════════════════════════════════════
+// BUILD
+// ══════════════════════════════════════
+function build() {
+  const wrap  = document.getElementById('scroll-wrap');
+  const pipsE = document.getElementById('tb-pips');
+  wrap.innerHTML  = '';
+  pipsE.innerHTML = '';
+
+  // Edition number
+  const now   = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dn    = Math.floor((now - start) / 86400000);
+  document.getElementById('tb-edition').textContent = `#${String(dn).padStart(3,'0')}`;
+
+  // Card height = viewport minus topbar
+  const topH  = document.getElementById('topbar').offsetHeight;
+  const cardH = window.innerHeight - topH;
+  const photoH = Math.round(cardH * 0.40);
+
+  creators.forEach((c, i) => {
+    // pip
+    const pip = document.createElement('div');
+    pip.className = 'pip' + (i === 0 ? ' cur' : '');
+    pip.id = `pip-${i}`;
+    pipsE.appendChild(pip);
+
+    // card
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.height = cardH + 'px';
+
+    card.innerHTML = `
+      <div class="card-photo" style="height:${photoH}px">
+        <img src="${c.photo}" alt="${c.name}" loading="${i === 0 ? 'eager' : 'lazy'}">
+        <div class="card-photo-fade"></div>
+        <div class="card-badge">
+          <svg viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="4.5" stroke="#fff" stroke-width="2"/>
+            <circle cx="6" cy="6" r="1.5" fill="#fff"/>
+          </svg>
+          Spotted
+        </div>
+        <div class="card-num">${String(i+1).padStart(2,'0')} / 0${creators.length}</div>
+      </div>
+
+      <div class="card-body">
+        <div class="card-identity">
+          <div class="card-avatar">
+            <img src="${c.avatar}" alt="${c.name}">
+          </div>
+          <div>
+            <div class="card-name">${c.name}</div>
+            <div class="card-handle">
+              ${c.handle}
+              <div class="card-hdot"></div>
+              ${c.platform}
+            </div>
+            <div class="card-followers">
+              <strong>${c.followers}</strong> followers · before they blow up
+            </div>
+          </div>
+        </div>
+
+        <div class="card-hook">${c.hook}</div>
+
+        <div class="card-tags">
+          ${c.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+        </div>
+
+        <div class="card-note">
+          <div class="card-note-lbl">Editor's note</div>
+          <div class="card-note-txt">${c.note}</div>
+        </div>
+
+        <div class="card-cta">
+          <button class="btn-visit" onclick="window.open('${c.url}','_blank')">
+            Visit profile →
+          </button>
+          <button class="btn-save" id="save-${i}" onclick="toggleSave(${i})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      ${i === 0 ? `
+        <div class="swipe-hint" id="swipe-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+          </svg>
+          <span>swipe</span>
+        </div>` : ''}
+    `;
+    wrap.appendChild(card);
+  });
+
+  // END CARD
+  const end = document.createElement('div');
+  end.className = 'end-card';
+  end.style.height = cardH + 'px';
+  end.innerHTML = `
+    <div class="end-mosaic">
+      ${creators.map(c =>
+        `<div class="end-mosaic-item">
+          <img src="${c.avatar}" alt="${c.name}">
+        </div>`
+      ).join('')}
+    </div>
+
+    <div class="end-check">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+
+    <div class="end-title">You've seen<br>today's creators.</div>
+    <div class="end-sub">That's your 5 for today.<br>New edition drops at midnight.</div>
+
+    <div class="end-streak" id="end-streak-txt">
+      🔥 ${streak}-day streak — keep it going
+    </div>
+
+    <div class="end-countdown">
+      <div class="end-countdown-lbl">Next edition in</div>
+      <div class="end-countdown-time" id="countdown">--:--:--</div>
+    </div>
+
+    <button class="end-submit" onclick="window.open('https://tally.so','_blank')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      Submit your profile for tomorrow
+    </button>
+
+    <div class="end-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 19V5M19 12l-7-7-7 7"/>
+      </svg>
+      scroll up to revisit
+    </div>
+  `;
+  wrap.appendChild(end);
+
+  // observer
+  initObserver(cardH);
+  tick();
+}
+
+// ══════════════════════════════════════
+// INTERSECTION OBSERVER — handles pips + seen state
+// ══════════════════════════════════════
+function initObserver(cardH) {
+  const wrap  = document.getElementById('scroll-wrap');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+
+      if (el.classList.contains('card')) {
+        const cards = [...wrap.querySelectorAll('.card')];
+        const idx   = cards.indexOf(el);
+
+        document.querySelectorAll('.pip').forEach((p, i) => {
+          p.classList.toggle('done', i < idx);
+          p.classList.toggle('cur',  i === idx);
+        });
+
+        const hint = document.getElementById('swipe-hint');
+        if (hint && idx > 0) hint.style.opacity = '0';
+      }
+
+      if (el.classList.contains('end-card') && !seenAll) {
+        seenAll = true;
+        streak++;
+        document.querySelectorAll('.pip').forEach(p => {
+          p.classList.add('done');
+          p.classList.remove('cur');
+        });
+        const st = document.getElementById('end-streak-txt');
+        if (st) st.textContent = `🔥 ${streak}-day streak — keep it going`;
+        toast('🔥 Streak maintained!');
+      }
+    });
+  }, { root: wrap, threshold: 0.55 });
+
+  wrap.querySelectorAll('.card, .end-card').forEach(el => obs.observe(el));
+}
+
+// ══════════════════════════════════════
+// SAVE
+// ══════════════════════════════════════
+function toggleSave(i) {
+  const btn = document.getElementById(`save-${i}`);
+  const svg = btn.querySelector('svg');
+  if (saved.has(i)) {
+    saved.delete(i);
+    btn.classList.remove('saved');
+    svg.setAttribute('fill', 'none');
+    svg.style.color = '';
+    toast('Removed from saved');
+  } else {
+    saved.add(i);
+    btn.classList.add('saved');
+    svg.setAttribute('fill', 'var(--green)');
+    svg.style.color = 'var(--green)';
+    toast('✦ Saved!');
+  }
+}
+
+// ══════════════════════════════════════
+// COUNTDOWN
+// ══════════════════════════════════════
+function tick() {
+  const now  = new Date();
+  const mn   = new Date(); mn.setHours(24, 0, 0, 0);
+  const d    = mn - now;
+  const h    = String(Math.floor(d / 3600000)).padStart(2, '0');
+  const m    = String(Math.floor(d % 3600000 / 60000)).padStart(2, '0');
+  const s    = String(Math.floor(d % 60000 / 1000)).padStart(2, '0');
+  const el   = document.getElementById('countdown');
+  if (el) el.textContent = `${h}:${m}:${s}`;
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('resize', () => build());
+build();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
