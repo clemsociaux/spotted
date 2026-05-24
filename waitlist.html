@@ -552,6 +552,20 @@ footer a:hover{color:rgba(255,255,255,.5)}
   .hero{padding:110px 20px 60px}
 }
 </style>
+<style>
+  .iframe-container {
+    width: 100%;
+    max-width: 800px; /* optionnel */
+    margin: 0 auto;
+  }
+  
+  .iframe-container iframe {
+    width: 100%;
+    min-height: 300px;
+    height: 70vh; /* responsive selon la hauteur écran */
+    border: none;
+  }
+</style>
 </head>
 <body>
 
@@ -859,7 +873,16 @@ footer a:hover{color:rgba(255,255,255,.5)}
         <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </button>
       -->
-      <iframe style="width:800px; height:300px" src="https://tally.so/r/GxQJMz"></iframe>
+      
+    </div>
+    <div class="iframe-container">
+      <iframe 
+        src="https://tally.so/r/GxQJMz"
+        frameborder="0"
+        marginheight="0"
+        marginwidth="0"
+        title="Formulaire"
+      ></iframe>
     </div>
     <div class="bottom-note" id="bot-success-msg" style="display:none;color:var(--green)">✓ You're on the list! We'll be in touch soon.</div>
     <p class="bottom-note">First 100 spots get 3 months Pro free · <span style="color:rgba(255,255,255,.25)" id="spots-left">61 spots remaining</span></p>
