@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FeedbackKit — Visual Feedback Reports</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;
+  --g50:#f7f8fa;--g100:#f0f2f5;--g200:#e2e6ec;--g300:#c8cfda;
+  --g400:#97a0b3;--g500:#68738a;--g600:#46506a;--g700:#2d374f;
+  --g800:#1a2235;--g900:#0d1321;
+  --b50:#eef3ff;--b100:#d9e4ff;--b200:#b3caff;
+  --b500:#3b5bdb;--b600:#2f4ac4;--b700:#2040a8;
+  --r50:#fff0f0;--r100:#ffe0e0;--r500:#e03131;--r600:#c92a2a;
+  --o50:#fff4e6;--o100:#ffe8cc;--o500:#f76707;--o600:#e8590c;
+  --gr50:#f0fff4;--gr100:#ccfadc;--gr500:#2f9e44;--gr600:#237032;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+  --rad:8px;--rad2:12px;--rad3:16px;
+  --sh0:0 1px 2px rgba(0,0,0,.05);
+  --sh1:0 2px 8px rgba(0,0,0,.07);
+  --sh2:0 8px 24px rgba(0,0,0,.1);
+  --sh3:0 20px 60px rgba(0,0,0,.15);
+  --nav:220px;
+}
+html,body{height:100%;font-family:var(--sans);font-size:14px;color:var(--g800);background:var(--g50);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ── APP SHELL ─────────────────────────────────────────────── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--nav);flex-shrink:0;background:var(--white);border-right:1px solid var(--g200);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .25s}
+.main{flex:1;margin-left:var(--nav);display:flex;flex-direction:column;min-height:100vh;min-width:0}
+
+/* ── SIDEBAR ───────────────────────────────────────────────── */
+.sb-logo{padding:18px 16px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:9px}
+.sb-logo-mark{width:30px;height:30px;border-radius:8px;background:var(--b500);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo-mark svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sb-logo-name{font-size:15px;font-weight:700;color:var(--g900);letter-spacing:-.3px}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto}
+.sb-section{font-size:10px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:1px;padding:10px 8px 4px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--rad);color:var(--g600);cursor:pointer;transition:all .12s;font-size:13px;font-weight:500;user-select:none}
+.sb-item:hover{background:var(--g50);color:var(--g800)}
+.sb-item.active{background:var(--b50);color:var(--b600);font-weight:600}
+.sb-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:10px;font-weight:700;font-family:var(--mono);background:var(--b100);color:var(--b600);padding:1px 6px;border-radius:10px}
+.sb-foot{padding:12px 8px;border-top:1px solid var(--g100)}
+.sb-user{display:flex;align-items:center;gap:8px;padding:8px;border-radius:var(--rad);cursor:pointer;transition:background .12s}
+.sb-user:hover{background:var(--g50)}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--b500),#5c7cfa);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ── TOPBAR ────────────────────────────────────────────────── */
+.topbar{height:52px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0;position:sticky;top:0;z-index:50}
+.topbar-hamburger{display:none;width:34px;height:34px;border:1px solid var(--g200);border-radius:var(--rad);background:var(--white);align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.topbar-hamburger svg{width:16px;height:16px;stroke:var(--g600);fill:none;stroke-width:2;stroke-linecap:round}
+.topbar-title{font-size:15px;font-weight:700;color:var(--g900);letter-spacing:-.3px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar-gap{flex:1}
+
+/* ── BUTTONS ───────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--rad);font-size:13px;font-weight:500;cursor:pointer;transition:all .12s;border:1px solid var(--g200);background:var(--white);color:var(--g700);font-family:var(--sans);white-space:nowrap;line-height:1}
+.btn:hover{background:var(--g50);border-color:var(--g300);color:var(--g900)}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--b500);border-color:var(--b500);color:#fff}
+.btn.primary:hover{background:var(--b600);border-color:var(--b600)}
+.btn.danger{border-color:var(--r100);color:var(--r500)}
+.btn.danger:hover{background:var(--r50)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn.icon{padding:6px;width:32px;height:32px;justify-content:center}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ── PAGES (screens) ───────────────────────────────────────── */
+.screen{display:none;flex:1;flex-direction:column;min-height:0}
+.screen.active{display:flex}
+.screen-body{flex:1;overflow-y:auto;padding:24px 20px;max-width:900px;width:100%}
+.screen-body.full{max-width:none}
+
+/* ── DASHBOARD ─────────────────────────────────────────────── */
+.dash-hero{background:var(--white);border:1px solid var(--g200);border-radius:var(--rad2);padding:28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:var(--sh0)}
+.dash-hero-text h2{font-size:20px;font-weight:700;color:var(--g900);letter-spacing:-.4px;margin-bottom:4px}
+.dash-hero-text p{font-size:13px;color:var(--g500);line-height:1.6}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.stat-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--rad2);padding:16px;box-shadow:var(--sh0);text-align:center}
+.stat-val{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--g900);letter-spacing:-1px;line-height:1}
+.stat-lbl{font-size:11px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.stat-card.blue .stat-val{color:var(--b500)}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.project-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--rad2);padding:18px;cursor:pointer;transition:all .15s;box-shadow:var(--sh0);position:relative;overflow:hidden}
+.project-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--b500);opacity:0;transition:opacity .15s}
+.project-card:hover{border-color:var(--g300);box-shadow:var(--sh1);transform:translateY(-1px)}
+.project-card:hover::before{opacity:1}
+.project-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px}
+.project-icon{width:36px;height:36px;border-radius:var(--rad);background:var(--b50);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.project-icon svg{width:18px;height:18px;stroke:var(--b500);fill:none;stroke-width:1.8;stroke-linecap:round}
+.project-name{font-size:14px;font-weight:600;color:var(--g900);margin-bottom:3px;letter-spacing:-.2px}
+.project-meta{font-size:12px;color:var(--g500)}
+.project-stats{display:flex;gap:12px}
+.project-stat{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--g400);font-family:var(--mono)}
+.project-stat svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.empty-state{padding:60px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.empty-icon{width:56px;height:56px;border-radius:14px;background:var(--g100);display:flex;align-items:center;justify-content:center}
+.empty-icon svg{width:26px;height:26px;stroke:var(--g400);fill:none;stroke-width:1.5;stroke-linecap:round}
+.empty-state h3{font-size:16px;font-weight:600;color:var(--g700)}
+.empty-state p{font-size:13px;color:var(--g500);max-width:280px;line-height:1.65}
+
+/* ── PROJECT SCREEN ────────────────────────────────────────── */
+.project-topbar{display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--g500)}
+.breadcrumb span{cursor:pointer;transition:color .12s}
+.breadcrumb span:hover{color:var(--b500)}
+.breadcrumb svg{width:14px;height:14px;stroke:var(--g400);fill:none;stroke-width:1.5;stroke-linecap:round}
+.pages-list{display:flex;flex-direction:column;gap:14px}
+.page-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--rad2);overflow:hidden;box-shadow:var(--sh0);transition:all .2s}
+.page-card.moving{box-shadow:var(--sh2);transform:scale(1.01);border-color:var(--b200);z-index:10}
+.page-card-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--g100);background:var(--g50)}
+.page-num{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--g500)}
+.page-title-inp{flex:1;background:none;border:none;outline:none;font-size:14px;font-weight:600;color:var(--g800);font-family:var(--sans)}
+.page-title-inp::placeholder{color:var(--g400)}
+.priority-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;font-family:var(--mono);white-space:nowrap}
+.priority-badge.high{background:var(--r100);color:var(--r600)}
+.priority-badge.medium{background:var(--o100);color:var(--o600)}
+.priority-badge.low{background:var(--gr100);color:var(--gr600)}
+.page-reorder{display:flex;gap:4px}
+.page-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.page-image-area{border-right:1px solid var(--g100);min-height:180px;display:flex;align-items:center;justify-content:center;background:var(--g50);position:relative;overflow:hidden}
+.page-image-area img{width:100%;height:100%;object-fit:contain;max-height:220px}
+.page-image-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;text-align:center;cursor:pointer;width:100%;height:100%;min-height:180px;transition:background .12s}
+.page-image-placeholder:hover{background:var(--g100)}
+.page-image-placeholder svg{width:28px;height:28px;stroke:var(--g400);fill:none;stroke-width:1.5;stroke-linecap:round}
+.page-image-placeholder span{font-size:12px;color:var(--g400)}
+.page-comments{padding:12px;display:flex;flex-direction:column;gap:8px}
+.comment-item{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rad);padding:8px 10px;font-size:12px;color:var(--g700);line-height:1.5;position:relative;animation:commentIn .2s ease}
+@keyframes commentIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.comment-del{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:4px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .12s;color:var(--g400)}
+.comment-item:hover .comment-del{opacity:1}
+.comment-del:hover{color:var(--r500);background:var(--r50)}
+.comment-del svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.comment-add-row{display:flex;gap:6px;margin-top:4px}
+.comment-textarea{flex:1;background:var(--white);border:1px solid var(--g200);border-radius:var(--rad);padding:7px 10px;font-size:12px;font-family:var(--sans);color:var(--g800);resize:none;outline:none;transition:border-color .12s;min-height:58px}
+.comment-textarea:focus{border-color:var(--b500);box-shadow:0 0 0 2px rgba(59,91,219,.1)}
+.comment-textarea::placeholder{color:var(--g400)}
+
+/* ── UPLOAD MODAL ──────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:16px}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:var(--rad3);width:100%;max-width:480px;overflow:hidden;box-shadow:var(--sh3);transform:translateY(8px) scale(.98);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px}
+.modal-head h3{font-size:15px;font-weight:700;color:var(--g900);flex:1;letter-spacing:-.3px}
+.modal-close{width:28px;height:28px;border:1px solid var(--g200);border-radius:var(--rad);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .12s}
+.modal-close:hover{background:var(--g100)}
+.modal-close svg{width:13px;height:13px;stroke:var(--g600);fill:none;stroke-width:2;stroke-linecap:round}
+.modal-body{padding:20px}
+.drop-area{border:2px dashed var(--g300);border-radius:var(--rad2);padding:40px 20px;text-align:center;cursor:pointer;transition:all .15s;background:var(--g50)}
+.drop-area:hover,.drop-area.dragover{border-color:var(--b500);background:var(--b50)}
+.drop-icon{width:48px;height:48px;border-radius:12px;background:var(--b100);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.drop-icon svg{width:24px;height:24px;stroke:var(--b500);fill:none;stroke-width:1.8;stroke-linecap:round}
+.drop-title{font-size:14px;font-weight:600;color:var(--g800);margin-bottom:4px}
+.drop-sub{font-size:12px;color:var(--g500)}
+.drop-sep{font-size:12px;color:var(--g400);margin:14px 0;position:relative}
+.drop-sep::before,.drop-sep::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--g200)}
+.drop-sep::before{left:0}.drop-sep::after{right:0}
+.upload-progress{margin-top:14px;display:none}
+.progress-bar-wrap{background:var(--g100);border-radius:4px;height:5px;overflow:hidden;margin-bottom:6px}
+.progress-bar-fill{height:100%;background:var(--b500);border-radius:4px;transition:width .3s;width:0}
+.progress-label{font-size:11px;color:var(--g500);font-family:var(--mono)}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--g100);display:flex;justify-content:flex-end;gap:8px}
+
+/* ── EXPORT SCREEN ─────────────────────────────────────────── */
+.export-header{background:var(--white);border:1px solid var(--g200);border-radius:var(--rad2);padding:20px;margin-bottom:20px;box-shadow:var(--sh0)}
+.report-preview{display:flex;flex-direction:column;gap:16px}
+.report-page{background:var(--white);border:1px solid var(--g200);border-radius:var(--rad2);overflow:hidden;box-shadow:var(--sh0)}
+.report-page-header{padding:14px 18px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px;background:var(--g50)}
+.report-page-num{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--g500)}
+.report-page-title{font-size:14px;font-weight:600;color:var(--g800);flex:1}
+.report-body{display:grid;grid-template-columns:200px 1fr;gap:0}
+.report-img{background:var(--g100);min-height:140px;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--g100)}
+.report-img img{width:100%;height:100%;object-fit:contain;max-height:160px}
+.report-comments{padding:14px 16px}
+.report-comment{padding:7px 0;border-bottom:1px solid var(--g100);font-size:12px;color:var(--g700);line-height:1.5;display:flex;gap:8px}
+.report-comment:last-child{border-bottom:none}
+.report-comment-num{font-family:var(--mono);font-size:10px;color:var(--g400);flex-shrink:0;padding-top:1px}
+.report-no-comments{font-size:12px;color:var(--g400);font-style:italic;padding:8px 0}
+
+/* ── SHARE VIEW ────────────────────────────────────────────── */
+.share-topbar{background:var(--white);border-bottom:1px solid var(--g200);padding:14px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.share-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--gr100);color:var(--gr600);font-family:var(--mono)}
+.share-body{flex:1;overflow-y:auto;padding:24px 20px;max-width:800px;width:100%}
+
+/* ── SECTION HEADINGS ──────────────────────────────────────── */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.section-title{font-size:13px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
+.sh{font-size:11px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.sh::after{content:'';flex:1;height:1px;background:var(--g200)}
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+.toast-wrap{position:fixed;bottom:20px;right:16px;z-index:999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--g900);color:#fff;border-radius:var(--rad2);padding:10px 14px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--sh2);animation:toastIn .2s ease forwards;pointer-events:none}
+.toast svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.toast.s svg{color:#69db7c}.toast.i svg{color:#74c0fc}.toast.e svg{color:#ff8787}
+@keyframes toastIn{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:scale(.94)}}
+
+/* ── DRAWER MOBILE OVERLAY ─────────────────────────────────── */
+.drawer-overlay{position:fixed;inset:0;z-index:200;visibility:hidden;pointer-events:none}
+.drawer-overlay.open{visibility:visible;pointer-events:all}
+.drawer-bg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .25s;cursor:pointer}
+.drawer-overlay.open .drawer-bg{opacity:1}
+.drawer-panel{position:absolute;left:0;top:0;bottom:0;width:var(--nav);background:var(--white);border-right:1px solid var(--g200);transform:translateX(-100%);transition:transform .26s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+.drawer-overlay.open .drawer-panel{transform:translateX(0)}
+
+/* ── MOBILE ────────────────────────────────────────────────── */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .topbar-hamburger{display:flex}
+  .screen-body{padding:16px}
+  .dash-hero{flex-direction:column;align-items:flex-start}
+  .stats-row{grid-template-columns:repeat(3,1fr);gap:8px}
+  .projects-grid{grid-template-columns:1fr}
+  .page-body{grid-template-columns:1fr}
+  .page-image-area{border-right:none;border-bottom:1px solid var(--g100)}
+  .report-body{grid-template-columns:1fr}
+  .report-img{border-right:none;border-bottom:1px solid var(--g100)}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr}
+  .stat-card{display:flex;align-items:center;gap:12px;text-align:left}
+  .stat-card .stat-val{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ══ SIDEBAR (desktop) ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 13h4"/></svg>
+    </div>
+    <span class="sb-logo-name">FeedbackKit</span>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Workspace</div>
+    <div class="sb-item active" id="nav-dashboard" onclick="showScreen('dashboard',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="sb-item" id="nav-project" onclick="showScreen('project',this)" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Current Project
+      <span class="sb-badge" id="sb-page-count">0</span>
+    </div>
+    <div class="sb-section">Output</div>
+    <div class="sb-item" id="nav-export" onclick="showScreen('export',this)">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export Report
+    </div>
+    <div class="sb-item" id="nav-share" onclick="showScreen('share',this)">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Share View
+    </div>
+  </nav>
+  <div class="sb-foot">
+    <div class="sb-user">
+      <div class="sb-avatar">JD</div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--g700)">Jean Dupont</div>
+        <div style="font-size:11px;color:var(--g400)">Free plan</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ DRAWER (mobile) ══ -->
+<div class="drawer-overlay" id="drawer-overlay">
+  <div class="drawer-bg" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="sb-logo" style="padding:16px">
+      <div class="sb-logo-mark"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 13h4"/></svg></div>
+      <span class="sb-logo-name">FeedbackKit</span>
+      <button onclick="closeDrawer()" style="margin-left:auto;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;color:var(--g500)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Workspace</div>
+      <div class="sb-item active" onclick="showScreen('dashboard');closeDrawer()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="sb-item" id="drawer-nav-project" onclick="showScreen('project');closeDrawer()" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Current Project
+      </div>
+      <div class="sb-section">Output</div>
+      <div class="sb-item" onclick="showScreen('export');closeDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Report
+      </div>
+      <div class="sb-item" onclick="showScreen('share');closeDrawer()">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share View
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="topbar-hamburger" onclick="openDrawer()">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="topbar-title" id="topbar-title">Dashboard</span>
+    <div class="topbar-gap"></div>
+    <button class="btn sm" id="topbar-action" onclick="openUploadModal()" style="display:none">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Page
+    </button>
+  </div>
+
+  <!-- ════ SCREEN: DASHBOARD ════ -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="screen-body">
+
+      <div class="dash-hero">
+        <div class="dash-hero-text">
+          <h2>Visual Feedback Reports</h2>
+          <p>Upload screenshots, add structured comments,<br>export a client-ready PDF report.</p>
+        </div>
+        <button class="btn primary" onclick="openNewProjectModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Project
+        </button>
+      </div>
+
+      <div class="stats-row" style="margin-bottom:24px">
+        <div class="stat-card blue">
+          <div class="stat-val" id="stat-projects">0</div>
+          <div class="stat-lbl">Projects</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-pages">0</div>
+          <div class="stat-lbl">Pages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-comments">0</div>
+          <div class="stat-lbl">Comments</div>
+        </div>
+      </div>
+
+      <div class="sh">Recent Projects</div>
+      <div class="projects-grid" id="projects-grid">
+        <div class="empty-state" id="empty-dash">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <h3>No projects yet</h3>
+          <p>Create your first project to start building visual feedback reports.</p>
+          <button class="btn primary" onclick="openNewProjectModal()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Project
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: PROJECT ════ -->
+  <div class="screen" id="screen-project">
+    <div class="screen-body">
+      <div class="section-head" style="margin-bottom:18px">
+        <div class="breadcrumb">
+          <span onclick="showScreen('dashboard')">Dashboard</span>
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          <span id="breadcrumb-project" style="color:var(--g900);font-weight:600">Project</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn sm" onclick="showScreen('export')">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+          <button class="btn sm primary" onclick="openUploadModal()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Page
+          </button>
+        </div>
+      </div>
+
+      <div class="pages-list" id="pages-list">
+        <div class="empty-state" id="empty-project">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>No pages yet</h3>
+          <p>Upload your first screenshot to start building your feedback report.</p>
+          <button class="btn primary" onclick="openUploadModal()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Upload Screenshot
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: EXPORT ════ -->
+  <div class="screen" id="screen-export">
+    <div class="screen-body">
+      <div class="section-head" style="margin-bottom:18px">
+        <div>
+          <div style="font-size:18px;font-weight:700;color:var(--g900);letter-spacing:-.4px;margin-bottom:3px">Export Report</div>
+          <div style="font-size:13px;color:var(--g500)">Preview your structured feedback report before exporting.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn sm" onclick="exportJSON()">
+            <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Export JSON
+          </button>
+          <button class="btn sm primary" onclick="mockPDF()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
+          </button>
+        </div>
+      </div>
+
+      <div class="export-header">
+        <div style="font-size:16px;font-weight:700;color:var(--g900);margin-bottom:4px" id="export-project-name">No project selected</div>
+        <div style="font-size:12px;color:var(--g500)" id="export-meta">Select a project to preview the report</div>
+      </div>
+
+      <div class="report-preview" id="report-preview">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <h3>No pages to export</h3>
+          <p>Go to a project and add pages with screenshots to generate a report.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: SHARE ════ -->
+  <div class="screen" id="screen-share" style="flex-direction:column">
+    <div class="share-topbar">
+      <div class="sb-logo-mark" style="width:26px;height:26px;border-radius:7px"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 13h4"/></svg></div>
+      <div style="font-size:14px;font-weight:700;color:var(--g900)" id="share-project-name">FeedbackKit Report</div>
+      <div class="share-badge">Read-only</div>
+      <div style="margin-left:auto;font-size:12px;color:var(--g400)" id="share-date"></div>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:24px 20px;background:var(--g50)">
+      <div style="max-width:760px;width:100%">
+        <div class="sh" style="margin-bottom:16px">Pages — ordered by priority</div>
+        <div id="share-pages" class="report-preview"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ══ UPLOAD MODAL ══ -->
+<div class="modal-overlay" id="upload-modal">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h3>Add Screenshot</h3>
+      <button class="modal-close" onclick="closeUploadModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="drop-area" id="drop-area" onclick="document.getElementById('file-input').click()"
+           ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="drop-title">Drop your screenshot here</div>
+        <div class="drop-sub">PNG, JPG, GIF, WebP accepted</div>
+        <div class="drop-sep">or</div>
+        <button class="btn sm" onclick="event.stopPropagation();document.getElementById('file-input').click()">Browse files</button>
+      </div>
+      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+      <div class="upload-progress" id="upload-progress">
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar"></div></div>
+        <div class="progress-label" id="progress-label">Uploading…</div>
+      </div>
+      <div style="margin-top:14px">
+        <label style="display:block;font-size:13px;font-weight:600;color:var(--g700);margin-bottom:6px">Page title (optional)</label>
+        <input id="page-title-input" type="text" placeholder="e.g. Homepage — Hero section"
+               style="width:100%;background:var(--g50);border:1px solid var(--g200);border-radius:var(--rad);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--g800);outline:none;transition:border-color .12s"
+               onfocus="this.style.borderColor='var(--b500)'" onblur="this.style.borderColor='var(--g200)'">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn sm" onclick="closeUploadModal()">Cancel</button>
+      <button class="btn sm primary" id="add-placeholder-btn" onclick="addPlaceholderPage()">Add without image</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NEW PROJECT MODAL ══ -->
+<div class="modal-overlay" id="new-project-modal" onclick="closeNewProjectModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h3>New Project</h3>
+      <button class="modal-close" onclick="closeNewProjectModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:13px;font-weight:600;color:var(--g700);margin-bottom:6px">Project name *</label>
+        <input id="new-project-name" type="text" placeholder="e.g. Acme Corp — Website Review"
+               style="width:100%;background:var(--g50);border:1px solid var(--g200);border-radius:var(--rad);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--g800);outline:none;transition:border-color .12s"
+               onfocus="this.style.borderColor='var(--b500)'" onblur="this.style.borderColor='var(--g200)'"
+               onkeydown="if(event.key==='Enter')createProject()">
+      </div>
+      <div>
+        <label style="display:block;font-size:13px;font-weight:600;color:var(--g700);margin-bottom:6px">Client name (optional)</label>
+        <input id="new-project-client" type="text" placeholder="e.g. Acme Corp"
+               style="width:100%;background:var(--g50);border:1px solid var(--g200);border-radius:var(--rad);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--g800);outline:none;transition:border-color .12s"
+               onfocus="this.style.borderColor='var(--b500)'" onblur="this.style.borderColor='var(--g200)'">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn sm" onclick="closeNewProjectModal()">Cancel</button>
+      <button class="btn sm primary" onclick="createProject()">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOASTS ══ -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+var state = {
+  projects: [],
+  currentProjectId: null,
+  nextPageId: 1,
+};
+
+// ── SCREEN NAVIGATION ──────────────────────────────────────────────────────
+function showScreen(name, navEl) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-'+name).classList.add('active');
+
+  document.querySelectorAll('.sb-item').forEach(function(n){ n.classList.remove('active'); });
+  var navItem = navEl || document.getElementById('nav-'+name);
+  if (navItem) navItem.classList.add('active');
+
+  var titles = { dashboard:'Dashboard', project:'Project', export:'Export Report', share:'Share View' };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+
+  var topbarAction = document.getElementById('topbar-action');
+  topbarAction.style.display = name === 'project' ? 'inline-flex' : 'none';
+
+  if (name === 'export') renderExport();
+  if (name === 'share') renderShare();
+}
+
+// ── DRAWER (mobile) ────────────────────────────────────────────────────────
+function openDrawer(){ document.getElementById('drawer-overlay').classList.add('open'); }
+function closeDrawer(){ document.getElementById('drawer-overlay').classList.remove('open'); }
+
+// ── PROJECTS ───────────────────────────────────────────────────────────────
+function openNewProjectModal() {
+  document.getElementById('new-project-name').value = '';
+  document.getElementById('new-project-client').value = '';
+  document.getElementById('new-project-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('new-project-name').focus(); }, 200);
+}
+function closeNewProjectModal(){ document.getElementById('new-project-modal').classList.remove('open'); }
+
+function createProject() {
+  var name = document.getElementById('new-project-name').value.trim();
+  if (!name) { document.getElementById('new-project-name').style.borderColor='var(--r500)'; return; }
+  var client = document.getElementById('new-project-client').value.trim();
+  var project = {
+    id: Date.now(), name: name, client: client || null,
+    pages: [], createdAt: new Date().toISOString()
+  };
+  state.projects.unshift(project);
+  state.currentProjectId = project.id;
+  closeNewProjectModal();
+  renderDashboard();
+  openProject(project.id);
+  toast('Project "' + name + '" created','s');
+}
+
+function openProject(id) {
+  state.currentProjectId = id;
+  document.getElementById('nav-project').style.display = 'flex';
+  document.getElementById('drawer-nav-project').style.display = 'flex';
+  var proj = getProject();
+  if (!proj) return;
+  document.getElementById('breadcrumb-project').textContent = proj.name;
+  renderPages();
+  showScreen('project', document.getElementById('nav-project'));
+}
+
+function getProject() {
+  return state.projects.find(function(p){ return p.id === state.currentProjectId; });
+}
+
+// ── PAGES ──────────────────────────────────────────────────────────────────
+function addPage(imageDataUrl, title) {
+  var proj = getProject();
+  if (!proj) return;
+  var page = {
+    id: state.nextPageId++,
+    title: title || 'Page ' + (proj.pages.length + 1),
+    image: imageDataUrl || null,
+    comments: []
+  };
+  proj.pages.push(page);
+  renderPages();
+  renderDashboard();
+  updateStats();
+}
+
+function deletePage(pageId) {
+  var proj = getProject();
+  if (!proj) return;
+  proj.pages = proj.pages.filter(function(p){ return p.id !== pageId; });
+  renderPages();
+  renderDashboard();
+  updateStats();
+  toast('Page removed','i');
+}
+
+function movePage(pageId, dir) {
+  var proj = getProject();
+  if (!proj) return;
+  var idx = proj.pages.findIndex(function(p){ return p.id === pageId; });
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= proj.pages.length) return;
+
+  // Animate
+  var cards = document.querySelectorAll('.page-card');
+  if (cards[idx]) { cards[idx].classList.add('moving'); setTimeout(function(){ cards[idx].classList.remove('moving'); }, 300); }
+
+  var tmp = proj.pages[idx];
+  proj.pages[idx] = proj.pages[newIdx];
+  proj.pages[newIdx] = tmp;
+  renderPages();
+}
+
+function getPriority(idx) {
+  if (idx === 0) return 'high';
+  if (idx <= 2) return 'medium';
+  return 'low';
+}
+function getPriorityLabel(idx) {
+  if (idx === 0) return 'HIGH PRIORITY';
+  if (idx <= 2) return 'MEDIUM';
+  return 'LOW';
+}
+
+function renderPages() {
+  var proj = getProject();
+  var container = document.getElementById('pages-list');
+  var emptyEl = document.getElementById('empty-project');
+  var sbCount = document.getElementById('sb-page-count');
+
+  if (!proj || proj.pages.length === 0) {
+    container.innerHTML = '';
+    container.appendChild(emptyEl || createEmptyState());
+    if (sbCount) sbCount.textContent = '0';
+    return;
+  }
+  if (sbCount) sbCount.textContent = proj.pages.length;
+
+  container.innerHTML = proj.pages.map(function(page, idx) {
+    var pri = getPriority(idx);
+    var priLabel = getPriorityLabel(idx);
+    var commentsHTML = page.comments.map(function(c, ci) {
+      return '<div class="comment-item">' + escHtml(c) +
+        '<button class="comment-del" onclick="deleteComment(' + page.id + ',' + ci + ')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+    }).join('');
+
+    return '<div class="page-card" id="page-' + page.id + '">' +
+      '<div class="page-card-header">' +
+        '<span class="page-num">PAGE ' + (idx+1) + '</span>' +
+        '<input class="page-title-inp" value="' + escAttr(page.title) + '" onchange="updatePageTitle(' + page.id + ',this.value)" placeholder="Page title…">' +
+        '<span class="priority-badge ' + pri + '">' + priLabel + '</span>' +
+        '<div class="page-reorder">' +
+          '<button class="btn icon sm" onclick="movePage(' + page.id + ',-1)"' + (idx===0?' disabled style="opacity:.3;cursor:default"':'') + ' title="Move up">' +
+            '<svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>' +
+          '<button class="btn icon sm" onclick="movePage(' + page.id + ',1)"' + (idx===proj.pages.length-1?' disabled style="opacity:.3;cursor:default"':'') + ' title="Move down">' +
+            '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+          '<button class="btn icon sm danger" onclick="deletePage(' + page.id + ')" title="Delete page">' +
+            '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="page-body">' +
+        '<div class="page-image-area">' +
+          (page.image
+            ? '<img src="' + page.image + '" alt="' + escAttr(page.title) + '">'
+            : '<div class="page-image-placeholder" onclick="openUploadForPage(' + page.id + ')">' +
+                '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
+                '<span>Click to add screenshot</span>' +
+              '</div>') +
+        '</div>' +
+        '<div class="page-comments">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Comments (' + page.comments.length + ')</div>' +
+          (commentsHTML || '<div style="font-size:12px;color:var(--g400);font-style:italic;margin-bottom:8px">No comments yet</div>') +
+          '<div class="comment-add-row">' +
+            '<textarea class="comment-textarea" id="comment-input-' + page.id + '" placeholder="Add feedback comment…" rows="2" onkeydown="handleCommentKey(event,' + page.id + ')"></textarea>' +
+            '<button class="btn sm primary" onclick="addComment(' + page.id + ')" style="align-self:flex-end">' +
+              '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function updatePageTitle(pageId, val) {
+  var proj = getProject();
+  if (!proj) return;
+  var page = proj.pages.find(function(p){ return p.id === pageId; });
+  if (page) page.title = val;
+}
+
+var uploadTargetPageId = null;
+
+function openUploadForPage(pageId) {
+  uploadTargetPageId = pageId;
+  openUploadModal();
+}
+
+// ── COMMENTS ───────────────────────────────────────────────────────────────
+function addComment(pageId) {
+  var proj = getProject();
+  if (!proj) return;
+  var input = document.getElementById('comment-input-' + pageId);
+  var text = input.value.trim();
+  if (!text) return;
+  var page = proj.pages.find(function(p){ return p.id === pageId; });
+  if (!page) return;
+  page.comments.push(text);
+  input.value = '';
+  renderPages();
+  updateStats();
+  toast('Comment added','s');
+}
+
+function deleteComment(pageId, commentIdx) {
+  var proj = getProject();
+  if (!proj) return;
+  var page = proj.pages.find(function(p){ return p.id === pageId; });
+  if (!page) return;
+  page.comments.splice(commentIdx, 1);
+  renderPages();
+  updateStats();
+}
+
+function handleCommentKey(e, pageId) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addComment(pageId); }
+}
+
+// ── UPLOAD ─────────────────────────────────────────────────────────────────
+function openUploadModal() {
+  document.getElementById('upload-modal').classList.add('open');
+  document.getElementById('upload-progress').style.display = 'none';
+  document.getElementById('page-title-input').value = '';
+  document.getElementById('progress-bar').style.width = '0';
+}
+function closeUploadModal() {
+  document.getElementById('upload-modal').classList.remove('open');
+  uploadTargetPageId = null;
+}
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-area').classList.add('dragover'); }
+function handleDragLeave() { document.getElementById('drop-area').classList.remove('dragover'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-area').classList.remove('dragover');
+  var file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processFile(file);
+}
+function handleFileSelect(e) {
+  var file = e.target.files[0];
+  if (file) processFile(file);
+  e.target.value = '';
+}
+function processFile(file) {
+  var progress = document.getElementById('upload-progress');
+  var bar = document.getElementById('progress-bar');
+  var label = document.getElementById('progress-label');
+  progress.style.display = 'block';
+  label.textContent = 'Reading ' + file.name + '…';
+  var pct = 0;
+  var interval = setInterval(function() {
+    pct += Math.random() * 30;
+    if (pct > 90) pct = 90;
+    bar.style.width = pct + '%';
+  }, 120);
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    clearInterval(interval);
+    bar.style.width = '100%';
+    label.textContent = 'Done!';
+    var dataUrl = ev.target.result;
+    setTimeout(function() {
+      var title = document.getElementById('page-title-input').value.trim() || file.name.replace(/\.[^.]+$/,'');
+      finishUpload(dataUrl, title);
+    }, 300);
+  };
+  reader.readAsDataURL(file);
+}
+function finishUpload(dataUrl, title) {
+  if (uploadTargetPageId) {
+    var proj = getProject();
+    var page = proj && proj.pages.find(function(p){ return p.id === uploadTargetPageId; });
+    if (page) { page.image = dataUrl; if (title) page.title = title; renderPages(); toast('Screenshot added','s'); }
+    uploadTargetPageId = null;
+  } else {
+    addPage(dataUrl, title);
+    toast('Page added','s');
+  }
+  closeUploadModal();
+}
+function addPlaceholderPage() {
+  var title = document.getElementById('page-title-input').value.trim() || 'Untitled page';
+  addPage(null, title);
+  closeUploadModal();
+  toast('Page added (no image)','i');
+}
+
+// ── EXPORT & SHARE ─────────────────────────────────────────────────────────
+function renderReportPages(container, proj) {
+  if (!proj || proj.pages.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>No pages to show</h3><p>Add pages in the project screen first.</p></div>';
+    return;
+  }
+  container.innerHTML = proj.pages.map(function(page, idx) {
+    var pri = getPriority(idx);
+    var priLabel = getPriorityLabel(idx);
+    var commentsHTML = page.comments.length
+      ? page.comments.map(function(c, ci) { return '<div class="report-comment"><span class="report-comment-num">' + (ci+1) + '.</span>' + escHtml(c) + '</div>'; }).join('')
+      : '<div class="report-no-comments">No comments for this page.</div>';
+    return '<div class="report-page">' +
+      '<div class="report-page-header">' +
+        '<span class="report-page-num">PAGE ' + (idx+1) + '</span>' +
+        '<span class="report-page-title">' + escHtml(page.title) + '</span>' +
+        '<span class="priority-badge ' + pri + '">' + priLabel + '</span>' +
+      '</div>' +
+      '<div class="report-body">' +
+        '<div class="report-img">' +
+          (page.image ? '<img src="' + page.image + '" alt="' + escAttr(page.title) + '">' : '<div style="padding:20px;text-align:center;color:var(--g400);font-size:12px">No screenshot</div>') +
+        '</div>' +
+        '<div class="report-comments">' + commentsHTML + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderExport() {
+  var proj = getProject();
+  var nameEl = document.getElementById('export-project-name');
+  var metaEl = document.getElementById('export-meta');
+  if (!proj) {
+    nameEl.textContent = 'No project selected';
+    metaEl.textContent = 'Open a project first to preview the report';
+    document.getElementById('report-preview').innerHTML = '<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>No project open</h3><p>Go to Dashboard, open a project, then come back to export.</p></div>';
+    return;
+  }
+  nameEl.textContent = proj.name + (proj.client ? ' — ' + proj.client : '');
+  var total = proj.pages.reduce(function(s,p){ return s+p.comments.length; }, 0);
+  metaEl.textContent = proj.pages.length + ' page' + (proj.pages.length!==1?'s':'') + ' · ' + total + ' comment' + (total!==1?'s':'') + ' · Generated ' + new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  renderReportPages(document.getElementById('report-preview'), proj);
+}
+
+function renderShare() {
+  var proj = getProject();
+  var nameEl = document.getElementById('share-project-name');
+  var dateEl = document.getElementById('share-date');
+  dateEl.textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  if (proj) {
+    nameEl.textContent = proj.name + (proj.client ? ' — ' + proj.client : '');
+    renderReportPages(document.getElementById('share-pages'), proj);
+  } else {
+    nameEl.textContent = 'FeedbackKit Report';
+    document.getElementById('share-pages').innerHTML = '<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>No project open</h3><p>Open a project first to see the share view.</p></div>';
+  }
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────────────────
+function renderDashboard() {
+  var grid = document.getElementById('projects-grid');
+  var empty = document.getElementById('empty-dash');
+  updateStats();
+  if (state.projects.length === 0) {
+    grid.innerHTML = '';
+    grid.appendChild(empty);
+    return;
+  }
+  grid.innerHTML = state.projects.map(function(proj) {
+    var totalComments = proj.pages.reduce(function(s,p){ return s+p.comments.length; }, 0);
+    var ago = timeAgo(proj.createdAt);
+    return '<div class="project-card" onclick="openProject(' + proj.id + ')">' +
+      '<div class="project-card-header">' +
+        '<div class="project-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>' +
+        '<div>' +
+          '<div class="project-name">' + escHtml(proj.name) + '</div>' +
+          '<div class="project-meta">' + (proj.client ? escHtml(proj.client) + ' · ' : '') + ago + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="project-stats">' +
+        '<div class="project-stat"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>' + proj.pages.length + ' pages</div>' +
+        '<div class="project-stat"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' + totalComments + ' comments</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function updateStats() {
+  var totalPages = state.projects.reduce(function(s,p){ return s+p.pages.length; }, 0);
+  var totalComments = state.projects.reduce(function(s,p){ return s+p.pages.reduce(function(ss,pg){ return ss+pg.comments.length; }, 0); }, 0);
+  document.getElementById('stat-projects').textContent = state.projects.length;
+  document.getElementById('stat-pages').textContent = totalPages;
+  document.getElementById('stat-comments').textContent = totalComments;
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+function exportJSON() {
+  var proj = getProject();
+  if (!proj) { toast('No project open','e'); return; }
+  var data = JSON.stringify(proj, null, 2);
+  var blob = new Blob([data], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = proj.name.replace(/\s+/g,'-') + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('JSON exported','s');
+}
+
+function mockPDF() {
+  var proj = getProject();
+  if (!proj) { toast('No project open','e'); return; }
+  toast('PDF generation coming soon — export JSON to use now','i');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function timeAgo(ts) {
+  var diff = Math.floor((Date.now() - new Date(ts)) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
+function toast(msg, type) {
+  var wrap = document.getElementById('toast-wrap');
+  var icons = {
+    s:'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+    i:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    e:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+  };
+  var el = document.createElement('div');
+  el.className = 'toast ' + (type||'i');
+  el.innerHTML = (icons[type]||icons.i) + escHtml(msg);
+  wrap.appendChild(el);
+  setTimeout(function(){
+    el.style.animation = 'toastOut .2s ease forwards';
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 220);
+  }, 3000);
+}
+
+// ── SEED DEMO DATA ─────────────────────────────────────────────────────────
+(function seedDemo() {
+  var demo = {
+    id: 1, name: 'Acme Corp — Website Review', client: 'Acme Corp',
+    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+    pages: [
+      { id: 1, title: 'Homepage — Hero', image: null, comments: ['CTA button needs more contrast', 'Headline font size too small on mobile', 'Missing social proof section below hero'] },
+      { id: 2, title: 'Pricing Page', image: null, comments: ['Add annual/monthly toggle', 'Enterprise tier missing key features list'] },
+      { id: 3, title: 'Contact Form', image: null, comments: ['Form validation errors not visible enough'] },
+    ]
+  };
+  state.projects.push(demo);
+  state.currentProjectId = 1;
+  state.nextPageId = 10;
+  document.getElementById('nav-project').style.display = 'flex';
+  document.getElementById('drawer-nav-project').style.display = 'flex';
+  document.getElementById('breadcrumb-project').textContent = demo.name;
+  renderDashboard();
+})();
+</script>
+</body>
+</html>
