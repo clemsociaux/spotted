@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadlog — Slide 3 par métier</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#111;display:flex;gap:24px;
+  padding:32px 20px;justify-content:center;
+  align-items:flex-start;flex-wrap:wrap;
+  min-height:100vh;font-family:'Instrument Sans',sans-serif;
+}
+@media(max-width:480px){
+  body{flex-direction:column;align-items:center;padding:12px;gap:16px}
+  .slide{width:calc(100vw - 24px) !important;height:calc(100dvh - 120px) !important;max-height:520px !important}
+}
+
+/* ── SLIDE SHELL ── */
+.slide-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.slide-label{
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;color:#555;text-align:center;
+}
+.slide{
+  width:360px;height:520px;border-radius:20px;overflow:hidden;
+  position:relative;flex-shrink:0;box-shadow:0 32px 80px rgba(0,0,0,.7);
+  background:#f8f9fc;display:flex;flex-direction:column;
+}
+
+/* ── TOPBAR ── */
+.s3-topbar{
+  flex-shrink:0;height:44px;background:rgba(255,255,255,.97);
+  border-bottom:1px solid #e4e8f0;
+  display:flex;align-items:center;padding:0 12px;gap:10px;
+}
+.s3-back{
+  width:26px;height:26px;border-radius:7px;
+  border:1px solid #e4e8f0;background:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.s3-back svg{width:12px;height:12px;stroke:#323a52;fill:none;stroke-width:2;stroke-linecap:round}
+.s3-cname{font-size:13px;font-weight:700;color:#0f1420;letter-spacing:-.3px}
+.s3-cemail{font-size:10px;color:#9aa3b5;font-family:'JetBrains Mono',monospace}
+.s3-pill{
+  font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;
+  font-family:'JetBrains Mono',monospace;margin-left:auto;white-space:nowrap;
+}
+.s3-pill.active{background:#dcfce7;color:#16a34a}
+.s3-pill.paused{background:#fef3c7;color:#d97706}
+
+/* ── TIMELINE ── */
+.s3-timeline{
+  flex:1;overflow:hidden;padding:5px 10px 0;
+  display:flex;flex-direction:column;
+}
+.s3-day{display:flex;align-items:center;gap:8px;margin:2px 0 5px}
+.s3-day-lbl{
+  font-size:9px;font-weight:700;color:#9aa3b5;
+  text-transform:uppercase;letter-spacing:.8px;
+  font-family:'JetBrains Mono',monospace;white-space:nowrap;
+}
+.s3-day-line{flex:1;height:1px;background:#e4e8f0}
+
+.s3-item{display:flex;gap:6px;margin-bottom:4px}
+.s3-item:last-child{margin-bottom:0}
+
+.s3-time{
+  font-size:10px;font-family:'JetBrains Mono',monospace;
+  color:#9aa3b5;padding-top:8px;width:32px;flex-shrink:0;line-height:1;
+}
+
+.s3-icon{
+  width:26px;height:26px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:4px;border:1px solid;
+}
+.s3-icon svg{width:12px;height:12px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.s3-icon.note{background:#eff4ff;border-color:#dbe6fe}
+.s3-icon.note svg{stroke:#3b71f8}
+.s3-icon.event{background:#f1f3f8;border-color:#e4e8f0}
+.s3-icon.event svg{stroke:#6b7589}
+.s3-icon.action{background:#f0fdf4;border-color:#dcfce7}
+.s3-icon.action svg{stroke:#16a34a}
+.s3-icon.action-done{background:#f0fdf4;border-color:#dcfce7;opacity:.6}
+.s3-icon.action-done svg{stroke:#16a34a}
+.s3-icon.reminder{background:#fffbeb;border-color:#fef3c7}
+.s3-icon.reminder svg{stroke:#d97706}
+.s3-icon.warn{background:#fff7ed;border-color:#fed7aa}
+.s3-icon.warn svg{stroke:#ea580c}
+
+.s3-card{
+  flex:1;background:#fff;border:1px solid #e4e8f0;
+  border-radius:8px;padding:4px 8px;margin-top:1px;
+}
+.s3-card.hi{border-color:#dbe6fe;background:#eff4ff}
+.s3-card.warn{border-color:#fed7aa;background:#fff7ed;border-width:1.5px}
+.s3-card.amber{border-color:#fde68a;background:#fffbeb;border-width:1.5px}
+.s3-card.green{border-color:#bbf7d0;background:#f0fdf4}
+.s3-card.red{border-color:#fecaca;background:#fff1f2;border-width:1.5px}
+
+.s3-badge{
+  font-size:7.5px;font-weight:700;padding:1px 5px;border-radius:10px;
+  font-family:'JetBrains Mono',monospace;
+  display:inline-block;margin-bottom:2px;
+  text-transform:uppercase;letter-spacing:.3px;
+}
+.s3-badge.note{background:#dbe6fe;color:#2d5ee8}
+.s3-badge.event{background:#f1f3f8;color:#4a5268}
+.s3-badge.action{background:#dcfce7;color:#16a34a}
+.s3-badge.reminder{background:#fef3c7;color:#d97706}
+.s3-badge.warn{background:#fed7aa;color:#c2410c}
+.s3-badge.done{background:#f1f3f8;color:#9aa3b5}
+
+.s3-text{font-size:10px;color:#323a52;line-height:1.4}
+.s3-text.done{text-decoration:line-through;color:#9aa3b5}
+.s3-text.bold{font-weight:700;color:#0f1420}
+.s3-text.orange{font-weight:700;color:#c2410c}
+.s3-text.blue{font-weight:700;color:#2d5ee8}
+.s3-text.green{font-weight:700;color:#15803d}
+.s3-text.red{font-weight:700;color:#dc2626}
+.s3-meta{font-size:8.5px;color:#9aa3b5;margin-top:2px;font-family:'JetBrains Mono',monospace}
+.s3-meta.amber{color:#d97706;font-weight:600}
+.s3-meta.red{color:#dc2626;font-weight:600}
+.s3-meta.green{color:#16a34a;font-weight:600}
+
+/* ── QUICK INPUT ── */
+.s3-input-bar{
+  flex-shrink:0;background:#fff;
+  border-top:2px solid #e4e8f0;
+  padding:7px 10px 9px;
+  display:flex;flex-direction:column;gap:5px;
+  box-shadow:0 -4px 16px rgba(0,0,0,.07);
+}
+.s3-type-row{display:flex;gap:4px}
+.s3-type-btn{
+  display:flex;align-items:center;gap:3px;
+  padding:3px 7px;border-radius:20px;border:1.5px solid;
+  font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;
+}
+.s3-type-btn.active{border-color:#3b5bdb;background:#eff4ff;color:#3b5bdb}
+.s3-type-btn.muted{border-color:#e4e8f0;background:#fff;color:#9aa3b5}
+.s3-input-row{display:flex;gap:7px;align-items:center}
+.s3-fake-input{
+  flex:1;background:#f8f9fc;border:1.5px solid #e4e8f0;
+  border-radius:8px;padding:7px 10px;
+  font-size:10px;color:#9aa3b5;font-family:'Instrument Sans',sans-serif;
+}
+.s3-send{
+  width:28px;height:28px;border-radius:8px;background:#3b5bdb;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.s3-send svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* SVG helpers */
+.icon-note{display:contents}.icon-event{display:contents}
+.icon-action{display:contents}.icon-reminder{display:contents}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     🎨 DESIGNER UI/UX
+════════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">🎨 Designer UI/UX</div>
+  <div class="slide">
+    <div class="s3-topbar">
+      <div class="s3-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div>
+        <div class="s3-cname">Studio Volta</div>
+        <div class="s3-cemail">lea@studiovolta.fr</div>
+      </div>
+      <div class="s3-pill active">Active</div>
+    </div>
+    <div class="s3-timeline">
+      <div class="s3-day"><span class="s3-day-lbl">Lundi</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">09:30</div>
+        <div class="s3-icon event"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="s3-card">
+          <span class="s3-badge event">Event</span>
+          <div class="s3-text">Présentation maquettes v1. Client aime la direction mais veut changer la couleur principale.</div>
+          <div class="s3-meta">by Client</div>
+        </div>
+      </div>
+      <div class="s3-item">
+        <div class="s3-time">10:00</div>
+        <div class="s3-icon note"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="s3-card hi">
+          <span class="s3-badge note">Note</span>
+          <div class="s3-text bold">Veut du bleu marine pas du bleu électrique. Ref : site Notion.</div>
+          <div class="s3-meta">by You</div>
+        </div>
+      </div>
+      <div class="s3-item">
+        <div class="s3-time">11:00</div>
+        <div class="s3-icon action-done"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="s3-card">
+          <span class="s3-badge done">Action ✓</span>
+          <div class="s3-text done">Envoyer lien Figma v2</div>
+        </div>
+      </div>
+      <div class="s3-day" style="margin-top:4px"><span class="s3-day-lbl">Aujourd'hui</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">now</div>
+        <div class="s3-icon reminder"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="s3-card amber">
+          <span class="s3-badge reminder">🔔 Reminder</span>
+          <div class="s3-text orange">Validation v2 attendue — relancer si pas de retour</div>
+          <div class="s3-meta amber">Dans 2h</div>
+        </div>
+      </div>
+    </div>
+    <div class="s3-input-bar">
+      <div class="s3-type-row">
+        <div class="s3-type-btn active">📝 Note</div>
+        <div class="s3-type-btn muted">⚡ Event</div>
+        <div class="s3-type-btn muted">✓ Action</div>
+        <div class="s3-type-btn muted">🔔 Remind</div>
+      </div>
+      <div class="s3-input-row">
+        <div class="s3-fake-input">Ajouter une note…</div>
+        <div class="s3-send"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     📊 COMPTABLE
+════════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">📊 Comptable</div>
+  <div class="slide">
+    <div class="s3-topbar">
+      <div class="s3-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div>
+        <div class="s3-cname">BTP Moreau SARL</div>
+        <div class="s3-cemail">moreau@btpmoreau.fr</div>
+      </div>
+      <div class="s3-pill active">Active</div>
+    </div>
+    <div class="s3-timeline">
+      <div class="s3-day"><span class="s3-day-lbl">15 mars</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">14:00</div>
+        <div class="s3-icon note"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="s3-card hi">
+          <span class="s3-badge note">Note</span>
+          <div class="s3-text bold">Moreau envoie toujours ses justificatifs en retard. Relance nécessaire chaque mois.</div>
+          <div class="s3-meta">by You</div>
+        </div>
+      </div>
+      <div class="s3-item">
+        <div class="s3-time">14:30</div>
+        <div class="s3-icon action-done"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="s3-card">
+          <span class="s3-badge done">Action ✓</span>
+          <div class="s3-text done">Déclaration TVA T1 envoyée</div>
+          <div class="s3-meta green">Envoyée le 15/03</div>
+        </div>
+      </div>
+      <div class="s3-day" style="margin-top:4px"><span class="s3-day-lbl">Aujourd'hui</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">09:00</div>
+        <div class="s3-icon warn"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="s3-card red">
+          <span class="s3-badge warn">⚠️ Urgent</span>
+          <div class="s3-text red">Justificatifs avril manquants — deadline dans 3 jours</div>
+          <div class="s3-meta red">Relance #2</div>
+        </div>
+      </div>
+      <div class="s3-item" style="margin-bottom:0">
+        <div class="s3-time">now</div>
+        <div class="s3-icon reminder"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="s3-card amber">
+          <span class="s3-badge reminder">🔔 Reminder</span>
+          <div class="s3-text orange">Appeler Moreau si pas de réponse avant 16h</div>
+        </div>
+      </div>
+    </div>
+    <div class="s3-input-bar">
+      <div class="s3-type-row">
+        <div class="s3-type-btn active">📝 Note</div>
+        <div class="s3-type-btn muted">⚡ Event</div>
+        <div class="s3-type-btn muted">✓ Action</div>
+        <div class="s3-type-btn muted">🔔 Remind</div>
+      </div>
+      <div class="s3-input-row">
+        <div class="s3-fake-input">Ajouter une note…</div>
+        <div class="s3-send"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     💻 DEV FREELANCE
+════════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">💻 Dev Freelance</div>
+  <div class="slide">
+    <div class="s3-topbar">
+      <div class="s3-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div>
+        <div class="s3-cname">Foodtech Startup</div>
+        <div class="s3-cemail">yann@cruncheat.io</div>
+      </div>
+      <div class="s3-pill active">Active</div>
+    </div>
+    <div class="s3-timeline">
+      <div class="s3-day"><span class="s3-day-lbl">Mercredi</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">10:00</div>
+        <div class="s3-icon event"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="s3-card">
+          <span class="s3-badge event">Event</span>
+          <div class="s3-text">Specs changent encore — veulent ajouter un système de paiement en plus du MVP.</div>
+          <div class="s3-meta">by Client</div>
+        </div>
+      </div>
+      <div class="s3-item">
+        <div class="s3-time">10:20</div>
+        <div class="s3-icon note"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="s3-card hi">
+          <span class="s3-badge note">Note</span>
+          <div class="s3-text bold">3ème changement de specs. Facturer en TJM, pas au forfait.</div>
+          <div class="s3-meta">by You</div>
+        </div>
+      </div>
+      <div class="s3-item">
+        <div class="s3-time">11:00</div>
+        <div class="s3-icon action"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="s3-card warn">
+          <span class="s3-badge warn">Action ouverte</span>
+          <div class="s3-text orange">Envoyer avenant contrat avec nouveau scope</div>
+          <div class="s3-meta red">En retard — 2 jours</div>
+        </div>
+      </div>
+      <div class="s3-item" style="margin-bottom:0">
+        <div class="s3-time">now</div>
+        <div class="s3-icon note"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="s3-card hi">
+          <span class="s3-badge note">Note live</span>
+          <div class="s3-text bold">Bug signalé sur le module panier — reproductible sur Safari iOS</div>
+          <div class="s3-meta">à l'instant</div>
+        </div>
+      </div>
+    </div>
+    <div class="s3-input-bar">
+      <div class="s3-type-row">
+        <div class="s3-type-btn active">📝 Note</div>
+        <div class="s3-type-btn muted">⚡ Event</div>
+        <div class="s3-type-btn muted">✓ Action</div>
+        <div class="s3-type-btn muted">🔔 Remind</div>
+      </div>
+      <div class="s3-input-row">
+        <div class="s3-fake-input">Ajouter une note…</div>
+        <div class="s3-send"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     📸 PHOTOGRAPHE
+════════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">📸 Photographe</div>
+  <div class="slide">
+    <div class="s3-topbar">
+      <div class="s3-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div>
+        <div class="s3-cname">Mariage Dubois</div>
+        <div class="s3-cemail">marie.dubois@gmail.com</div>
+      </div>
+      <div class="s3-pill active">Active</div>
+    </div>
+    <div class="s3-timeline">
+      <div class="s3-day"><span class="s3-day-lbl">2 semaines avant</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">15:00</div>
+        <div class="s3-icon note"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="s3-card hi">
+          <span class="s3-badge note">Note</span>
+          <div class="s3-text bold">Veut surtout des photos de famille. Grand-mère de 87 ans — prévoir moment dédié.</div>
+          <div class="s3-meta">by You</div>
+        </div>
+      </div>
+      <div class="s3-item">
+        <div class="s3-time">15:30</div>
+        <div class="s3-icon action-done"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="s3-card">
+          <span class="s3-badge done">Action ✓</span>
+          <div class="s3-text done">Envoyer planning photo de la journée</div>
+          <div class="s3-meta green">Validé par le client</div>
+        </div>
+      </div>
+      <div class="s3-day" style="margin-top:4px"><span class="s3-day-lbl">Aujourd'hui — J+5</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">09:00</div>
+        <div class="s3-icon action"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="s3-card green">
+          <span class="s3-badge action">Action</span>
+          <div class="s3-text green">Livrer galerie en ligne — 487 photos sélectionnées</div>
+          <div class="s3-meta green">Deadline aujourd'hui</div>
+        </div>
+      </div>
+      <div class="s3-item" style="margin-bottom:0">
+        <div class="s3-time">now</div>
+        <div class="s3-icon reminder"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="s3-card amber">
+          <span class="s3-badge reminder">🔔 Reminder</span>
+          <div class="s3-text orange">Envoyer le lien galerie + demander retours sous 7 jours</div>
+        </div>
+      </div>
+    </div>
+    <div class="s3-input-bar">
+      <div class="s3-type-row">
+        <div class="s3-type-btn active">📝 Note</div>
+        <div class="s3-type-btn muted">⚡ Event</div>
+        <div class="s3-type-btn muted">✓ Action</div>
+        <div class="s3-type-btn muted">🔔 Remind</div>
+      </div>
+      <div class="s3-input-row">
+        <div class="s3-fake-input">Ajouter une note…</div>
+        <div class="s3-send"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     ✍️ COPYWRITER
+════════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">✍️ Copywriter</div>
+  <div class="slide">
+    <div class="s3-topbar">
+      <div class="s3-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div>
+        <div class="s3-cname">Fintech Claro</div>
+        <div class="s3-cemail">sarah@claro.io</div>
+      </div>
+      <div class="s3-pill active">Active</div>
+    </div>
+    <div class="s3-timeline">
+      <div class="s3-day"><span class="s3-day-lbl">Lundi</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">10:00</div>
+        <div class="s3-icon note"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="s3-card hi">
+          <span class="s3-badge note">Note</span>
+          <div class="s3-text bold">Ton = confiant mais jamais arrogant. Éviter les termes "révolutionnaire" et "game-changer".</div>
+          <div class="s3-meta">by You</div>
+        </div>
+      </div>
+      <div class="s3-item">
+        <div class="s3-time">11:00</div>
+        <div class="s3-icon action-done"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="s3-card">
+          <span class="s3-badge done">Action ✓</span>
+          <div class="s3-text done">Homepage — version 3 livrée</div>
+          <div class="s3-meta green">Approuvée par Sarah</div>
+        </div>
+      </div>
+      <div class="s3-day" style="margin-top:4px"><span class="s3-day-lbl">Aujourd'hui</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">14:00</div>
+        <div class="s3-icon event"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="s3-card">
+          <span class="s3-badge event">Event</span>
+          <div class="s3-text">Veut réécrire la page pricing aussi — pas dans le scope initial.</div>
+          <div class="s3-meta">by Client</div>
+        </div>
+      </div>
+      <div class="s3-item" style="margin-bottom:0">
+        <div class="s3-time">now</div>
+        <div class="s3-icon note"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="s3-card hi">
+          <span class="s3-badge note">Note live</span>
+          <div class="s3-text bold">Pricing page = devis séparé. À envoyer avant vendredi.</div>
+          <div class="s3-meta">à l'instant</div>
+        </div>
+      </div>
+    </div>
+    <div class="s3-input-bar">
+      <div class="s3-type-row">
+        <div class="s3-type-btn active">📝 Note</div>
+        <div class="s3-type-btn muted">⚡ Event</div>
+        <div class="s3-type-btn muted">✓ Action</div>
+        <div class="s3-type-btn muted">🔔 Remind</div>
+      </div>
+      <div class="s3-input-row">
+        <div class="s3-fake-input">Ajouter une note…</div>
+        <div class="s3-send"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     🏗️ ARCHITECTE D'INTÉRIEUR
+════════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">🏗️ Architecte d'intérieur</div>
+  <div class="slide">
+    <div class="s3-topbar">
+      <div class="s3-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div>
+        <div class="s3-cname">Famille Renard</div>
+        <div class="s3-cemail">thomas.renard@gmail.com</div>
+      </div>
+      <div class="s3-pill active">Active</div>
+    </div>
+    <div class="s3-timeline">
+      <div class="s3-day"><span class="s3-day-lbl">Semaine dernière</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">10:00</div>
+        <div class="s3-icon note"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="s3-card hi">
+          <span class="s3-badge note">Note</span>
+          <div class="s3-text bold">Madame veut du chêne clair. Monsieur préfère du béton ciré. Décider ensemble.</div>
+          <div class="s3-meta">by You</div>
+        </div>
+      </div>
+      <div class="s3-item">
+        <div class="s3-time">11:00</div>
+        <div class="s3-icon action-done"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="s3-card">
+          <span class="s3-badge done">Action ✓</span>
+          <div class="s3-text done">Envoyer planche matières pour validation</div>
+          <div class="s3-meta green">Validée — chêne clair retenu</div>
+        </div>
+      </div>
+      <div class="s3-day" style="margin-top:4px"><span class="s3-day-lbl">Aujourd'hui</span><div class="s3-day-line"></div></div>
+      <div class="s3-item">
+        <div class="s3-time">09:00</div>
+        <div class="s3-icon warn"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="s3-card red">
+          <span class="s3-badge warn">⚠️ Chantier</span>
+          <div class="s3-text red">Délai fournisseur parquet repoussé de 3 semaines. Informer le client.</div>
+        </div>
+      </div>
+      <div class="s3-item" style="margin-bottom:0">
+        <div class="s3-time">now</div>
+        <div class="s3-icon reminder"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="s3-card amber">
+          <span class="s3-badge reminder">🔔 Reminder</span>
+          <div class="s3-text orange">Appeler Thomas avant 12h pour expliquer le retard</div>
+        </div>
+      </div>
+    </div>
+    <div class="s3-input-bar">
+      <div class="s3-type-row">
+        <div class="s3-type-btn active">📝 Note</div>
+        <div class="s3-type-btn muted">⚡ Event</div>
+        <div class="s3-type-btn muted">✓ Action</div>
+        <div class="s3-type-btn muted">🔔 Remind</div>
+      </div>
+      <div class="s3-input-row">
+        <div class="s3-fake-input">Ajouter une note…</div>
+        <div class="s3-send"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
