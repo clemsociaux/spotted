@@ -1,0 +1,753 @@
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadlog — Slide 3 × 10 métiers</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#111;display:flex;gap:24px;
+  padding:32px 20px;justify-content:center;
+  align-items:flex-start;flex-wrap:wrap;
+  min-height:100vh;font-family:'Instrument Sans',sans-serif;
+}
+@media(max-width:480px){
+  body{flex-direction:column;align-items:center;padding:12px;gap:16px}
+  .slide{width:calc(100vw - 24px) !important;height:calc(100dvh - 120px) !important;max-height:520px !important}
+}
+.slide-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.slide-label{
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;color:#555;text-align:center;
+}
+.slide{
+  width:360px;height:520px;border-radius:20px;overflow:hidden;
+  position:relative;flex-shrink:0;box-shadow:0 32px 80px rgba(0,0,0,.7);
+  background:#f8f9fc;display:flex;flex-direction:column;
+}
+/* ── TOPBAR ── */
+.tb{flex-shrink:0;height:44px;background:rgba(255,255,255,.97);border-bottom:1px solid #e4e8f0;display:flex;align-items:center;padding:0 12px;gap:10px}
+.tb-back{width:26px;height:26px;border-radius:7px;border:1px solid #e4e8f0;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tb-back svg{width:12px;height:12px;stroke:#323a52;fill:none;stroke-width:2;stroke-linecap:round}
+.tb-name{font-size:13px;font-weight:700;color:#0f1420;letter-spacing:-.3px}
+.tb-email{font-size:10px;color:#9aa3b5;font-family:'JetBrains Mono',monospace}
+.tb-pill{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;font-family:'JetBrains Mono',monospace;margin-left:auto;white-space:nowrap}
+.tb-pill.active{background:#dcfce7;color:#16a34a}
+.tb-pill.paused{background:#fef3c7;color:#d97706}
+.tb-pill.done{background:#f1f3f8;color:#6b7589}
+/* ── TIMELINE ── */
+.tl{flex:1;overflow:hidden;padding:5px 10px 0;display:flex;flex-direction:column}
+.day{display:flex;align-items:center;gap:8px;margin:2px 0 5px}
+.day-lbl{font-size:9px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:.8px;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.day-line{flex:1;height:1px;background:#e4e8f0}
+.item{display:flex;gap:6px;margin-bottom:4px}
+.item:last-child{margin-bottom:0}
+.t{font-size:10px;font-family:'JetBrains Mono',monospace;color:#9aa3b5;padding-top:8px;width:32px;flex-shrink:0;line-height:1}
+.t.now{color:#d97706;font-weight:700}
+.t.red{color:#dc2626;font-weight:700}
+.ico{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;border:1px solid}
+.ico svg{width:12px;height:12px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ico.n{background:#eff4ff;border-color:#dbe6fe}.ico.n svg{stroke:#3b71f8}
+.ico.e{background:#f1f3f8;border-color:#e4e8f0}.ico.e svg{stroke:#6b7589}
+.ico.a{background:#f0fdf4;border-color:#dcfce7}.ico.a svg{stroke:#16a34a}
+.ico.ad{background:#f0fdf4;border-color:#dcfce7;opacity:.6}.ico.ad svg{stroke:#16a34a}
+.ico.r{background:#fffbeb;border-color:#fef3c7}.ico.r svg{stroke:#d97706}
+.ico.w{background:#fff7ed;border-color:#fed7aa}.ico.w svg{stroke:#ea580c}
+.ico.x{background:#fff1f2;border-color:#fecaca}.ico.x svg{stroke:#dc2626}
+.c{flex:1;background:#fff;border:1px solid #e4e8f0;border-radius:8px;padding:4px 8px;margin-top:1px}
+.c.hi{border-color:#dbe6fe;background:#eff4ff}
+.c.am{border-color:#fde68a;background:#fffbeb;border-width:1.5px}
+.c.or{border-color:#fed7aa;background:#fff7ed;border-width:1.5px}
+.c.re{border-color:#fecaca;background:#fff1f2;border-width:1.5px}
+.c.gr{border-color:#bbf7d0;background:#f0fdf4}
+.b{font-size:7.5px;font-weight:700;padding:1px 5px;border-radius:10px;font-family:'JetBrains Mono',monospace;display:inline-block;margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px}
+.b.n{background:#dbe6fe;color:#2d5ee8}
+.b.e{background:#f1f3f8;color:#4a5268}
+.b.a{background:#dcfce7;color:#16a34a}
+.b.r{background:#fef3c7;color:#d97706}
+.b.w{background:#fed7aa;color:#c2410c}
+.b.d{background:#f1f3f8;color:#9aa3b5}
+.b.x{background:#fecaca;color:#dc2626}
+.tx{font-size:10px;color:#323a52;line-height:1.4}
+.tx.dk{font-weight:700;color:#0f1420}
+.tx.bl{font-weight:700;color:#2d5ee8}
+.tx.or{font-weight:700;color:#c2410c}
+.tx.re{font-weight:700;color:#dc2626}
+.tx.gr{font-weight:700;color:#15803d}
+.tx.dn{text-decoration:line-through;color:#9aa3b5}
+.mx{font-size:8.5px;color:#9aa3b5;margin-top:2px;font-family:'JetBrains Mono',monospace}
+.mx.gr{color:#16a34a;font-weight:600}
+.mx.or{color:#d97706;font-weight:600}
+.mx.re{color:#dc2626;font-weight:600}
+/* ── INPUT BAR ── */
+.ib{flex-shrink:0;background:#fff;border-top:2px solid #e4e8f0;padding:7px 10px 9px;display:flex;flex-direction:column;gap:5px;box-shadow:0 -4px 16px rgba(0,0,0,.07)}
+.tr{display:flex;gap:4px}
+.tbtn{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:20px;border:1.5px solid;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.tbtn.on{border-color:#3b5bdb;background:#eff4ff;color:#3b5bdb}
+.tbtn.off{border-color:#e4e8f0;background:#fff;color:#9aa3b5}
+.ir{display:flex;gap:7px;align-items:center}
+.fi{flex:1;background:#f8f9fc;border:1.5px solid #e4e8f0;border-radius:8px;padding:7px 10px;font-size:10px;color:#9aa3b5;font-family:'Instrument Sans',sans-serif}
+.sb{width:28px;height:28px;border-radius:8px;background:#3b5bdb;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+/* ── SVG ICONS ── */
+.svg-note{display:contents}
+</style>
+</head>
+<body>
+
+<!-- helpers -->
+<svg style="display:none">
+  <symbol id="i-back" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  <symbol id="i-event" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-action" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol>
+  <symbol id="i-reminder" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+</svg>
+
+<!-- ── MACRO for input bar ────────────────────────── -->
+
+<!-- ════════════════════════════════
+  1. COACH BUSINESS
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">🧠 Coach Business</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">Marc Lejeune</div><div class="tb-email">marc@mlejeune-conseil.fr</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Séance 1 — 3 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Peur du jugement = blocage principal. Éviter le mot "performance".</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:45</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Envoyer exercice "journal des victoires"</div>
+          <div class="mx gr">Fait — retour positif</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Séance 2 — 17 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico e"><svg><use href="#i-event"/></svg></div>
+        <div class="c"><span class="b e">Event</span>
+          <div class="tx">A négocié une augmentation de 15%. Débloqué grâce à la préparation.</div>
+          <div class="mx">by Client</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:50</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Préparer feuille de route objectifs Q2</div>
+          <div class="mx or">Pour séance 3 — dans 5 jours</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico r"><svg><use href="#i-reminder"/></svg></div>
+        <div class="c am"><span class="b r">🔔 Reminder</span>
+          <div class="tx or">Envoyer recap séance 2 avant 18h</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  2. CONSULTANT SEO
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">🔍 Consultant SEO</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">E-shop Maison Douce</div><div class="tb-email">clara@maisondouce.com</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Audit — 1er mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">09:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Budget Google Ads = 0. SEO organique uniquement. Résultats attendus en 3 mois.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Audit technique + liste de 40 mots-clés prioritaires</div>
+          <div class="mx gr">Livré le 5 mars</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Suivi — 20 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">14:00</div>
+        <div class="ico e"><svg><use href="#i-event"/></svg></div>
+        <div class="c"><span class="b e">Event</span>
+          <div class="tx">+34% trafic organique depuis l'audit. Clara très contente. Veut étendre au blog.</div>
+          <div class="mx">by Client</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">14:30</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Stratégie contenu blog — 12 articles/mois</div>
+          <div class="mx or">Devis à envoyer avant vendredi</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico r"><svg><use href="#i-reminder"/></svg></div>
+        <div class="c am"><span class="b r">🔔 Reminder</span>
+          <div class="tx or">Rapport mensuel mars — à envoyer aujourd'hui</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  3. COMMUNITY MANAGER
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">📱 Community Manager</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">Boulangerie Léon</div><div class="tb-email">contact@boulangerie-leon.fr</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Lundi</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">09:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Pas de posts politique ni religion. Ton chaleureux, artisanal, jamais corporate.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Planning contenu avril — 20 posts Instagram</div>
+          <div class="mx gr">Validé par Léon</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Jeudi</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">11:00</div>
+        <div class="ico e"><svg><use href="#i-event"/></svg></div>
+        <div class="c"><span class="b e">Event</span>
+          <div class="tx">Léon veut ajouter une promo "2ème croissant offert le samedi". À intégrer ce week-end.</div>
+          <div class="mx">by Client</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">11:15</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Créer visuel promo + story samedi 9h</div>
+          <div class="mx or">Vendredi soir — dans 2 jours</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note live</span>
+          <div class="tx dk">Photo fournisseur farine locale dispo — utiliser pour contenu "origine" en mai</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  4. CONSULTANT RH
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">👥 Consultant RH</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">Pharma Innova SAS</div><div class="tb-email">drh@pharmainnova.fr</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Kick-off — 10 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">09:30</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">DRH = Sophie Marais. PDG = Jean Kovac. Décision finale toujours Jean.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico e"><svg><use href="#i-event"/></svg></div>
+        <div class="c"><span class="b e">Event</span>
+          <div class="tx">Problème : turnover 40% en 18 mois. Objectif : identifier les causes + plan d'action 90j.</div>
+          <div class="mx">by Client</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">11:00</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Questionnaire anonyme employés — 47 réponses collectées</div>
+          <div class="mx gr">Résultats reçus le 18 mars</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Restitution — aujourd'hui</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">14:00</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Présenter rapport restitution à Jean + Sophie</div>
+          <div class="mx or">Dans 1h — prépare les slides</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Jean est méfiant. Commencer par les chiffres, pas les recommandations.</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  5. FORMATEUR / PROF INDÉPENDANT
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">📚 Formateur indépendant</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">Groupe ABF Lyon</div><div class="tb-email">formation@abflyon.fr</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Avant formation — 5 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Groupe de 12 personnes. Niveaux très hétérogènes. 3 stagiaires réfractaires au digital.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:30</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Adapter supports J1 pour profils débutants</div>
+          <div class="mx gr">Fait — version simplifiée prête</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">J1 formation — 12 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">17:00</div>
+        <div class="ico e"><svg><use href="#i-event"/></svg></div>
+        <div class="c"><span class="b e">Event</span>
+          <div class="tx">Très bonne dynamique. Sauf Paul Bertrand — résistant, questions agressives. À surveiller J2.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">17:30</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Envoyer supports J1 + exercices pratiques</div>
+          <div class="mx or">Ce soir avant 20h</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico r"><svg><use href="#i-reminder"/></svg></div>
+        <div class="c am"><span class="b r">🔔 Reminder</span>
+          <div class="tx or">Attestation de présence à signer — demain matin</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  6. AVOCAT / JURISTE INDÉPENDANT
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">⚖️ Juriste indépendant</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">StartupFlow SAS</div><div class="tb-email">ceo@startupflow.io</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Dossier ouvert — 28 fév</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">14:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Levée de fonds Series A en cours. CGU + contrats prestataires à sécuriser avant closing.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">15:00</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Rédiger CGU + mentions légales conformes RGPD</div>
+          <div class="mx gr">Validées le 10 mars</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Aujourd'hui — urgence</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">08:30</div>
+        <div class="ico x"><svg><use href="#i-warn"/></svg></div>
+        <div class="c re"><span class="b x">🚨 Urgent</span>
+          <div class="tx re">Investisseur demande clause de ratchet — à analyser avant 15h aujourd'hui.</div>
+          <div class="mx re">Message reçu ce matin</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">09:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Clause ratchet = potentiellement dilutif pour founders. Leur expliquer les risques.</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Rédiger note de synthèse clause ratchet — appel 15h</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  7. TRADUCTEUR / LINGUISTE
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">🌍 Traducteur freelance</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">Éditions du Phare</div><div class="tb-email">marine@editionsduphare.fr</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Brief — 2 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Roman policier 320 pages. Style noir américain. Garder les jeux de mots quand possible.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:20</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Marine préfère "tu" pour le narrateur. Pas de "vous" même pour les personnages âgés.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">11:00</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Livrer chapitres 1-5 pour validation du style</div>
+          <div class="mx gr">Approuvés — continuer</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Aujourd'hui</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">09:00</div>
+        <div class="ico e"><svg><use href="#i-event"/></svg></div>
+        <div class="c"><span class="b e">Event</span>
+          <div class="tx">Marine veut changer le titre du roman. Impacte le chapitre 12 déjà traduit.</div>
+          <div class="mx">by Client</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico r"><svg><use href="#i-reminder"/></svg></div>
+        <div class="c am"><span class="b r">🔔 Reminder</span>
+          <div class="tx or">Livraison chapitres 6-10 — deadline demain 12h</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  8. THÉRAPEUTE / PSY LIBÉRAL
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">🧘 Thérapeute libéral</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">Patient — J. Martin</div><div class="tb-email">Suivi hebdo depuis jan.</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Séance 8 — 12 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">14:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note séance</span>
+          <div class="tx dk">Évocation du père pour la 1ère fois. Sujet à approfondir progressivement. Ne pas forcer.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">14:45</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Exercice de pleine conscience quotidien — 10 min matin</div>
+          <div class="mx gr">Pratiqué 5j/7 selon retour</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Séance 9 — aujourd'hui</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">14:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note séance</span>
+          <div class="tx dk">Crise d'angoisse mercredi soir. Triggers : open space + réunion imprévue.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">14:50</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Envoyer fiche technique cohérence cardiaque</div>
+          <div class="mx or">Avant ce soir</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico r"><svg><use href="#i-reminder"/></svg></div>
+        <div class="c am"><span class="b r">🔔 Reminder</span>
+          <div class="tx or">Rappeler séance 10 — mardi 14h</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  9. AGENT IMMOBILIER INDÉPENDANT
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">🏠 Agent immobilier</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">Famille Gautier</div><div class="tb-email">gautier.nicolas@gmail.com</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">1er contact — 8 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Budget max 380k. Veulent jardin obligatoire. Pas de RDC. Secteur Montrouge/Vanves uniquement.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:30</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Madame ne veut pas de vis-à-vis. Monsieur veut garage. Les deux sont bloquants.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">11:00</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Visites — 3 biens sélectionnés</div>
+          <div class="mx gr">2 écartés. 1 en réflexion.</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Aujourd'hui</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">09:00</div>
+        <div class="ico e"><svg><use href="#i-event"/></svg></div>
+        <div class="c"><span class="b e">Event</span>
+          <div class="tx">Nouveau bien tombé — 375k, Vanves, jardin 60m², garage. Correspond parfaitement.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Appeler Nicolas maintenant — bien part vite</div>
+          <div class="mx re">Urgent — autre acquéreur intéressé</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+  10. VIDÉASTE / MOTION DESIGNER
+════════════════════════════════ -->
+<div class="slide-wrap">
+  <div class="slide-label">🎬 Vidéaste / Motion</div>
+  <div class="slide">
+    <div class="tb">
+      <div class="tb-back"><svg><use href="#i-back"/></svg></div>
+      <div><div class="tb-name">Naturalia France</div><div class="tb-email">comms@naturalia.fr</div></div>
+      <div class="tb-pill active">Active</div>
+    </div>
+    <div class="tl">
+      <div class="day"><span class="day-lbl">Brief — 5 mars</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">14:00</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Vidéo institutionnelle 90 sec. Musique : pas de voix. Ambiance nature, lent, apaisant.</div>
+          <div class="mx">by You</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">14:30</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c"><span class="b a">Action ✓</span>
+          <div class="tx dn">Moodboard + storyboard V1 envoyés</div>
+          <div class="mx gr">Validé avec 2 ajustements mineurs</div>
+        </div>
+      </div>
+      <div class="day" style="margin-top:4px"><span class="day-lbl">Aujourd'hui</span><div class="day-line"></div></div>
+      <div class="item">
+        <div class="t">10:00</div>
+        <div class="ico e"><svg><use href="#i-event"/></svg></div>
+        <div class="c"><span class="b e">Event</span>
+          <div class="tx">Direction veut ajouter voix-off. Contradictoire avec le brief initial. Scope change.</div>
+          <div class="mx">by Client</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="t">10:20</div>
+        <div class="ico n"><svg><use href="#i-note"/></svg></div>
+        <div class="c hi"><span class="b n">Note</span>
+          <div class="tx dk">Voix-off = +2 jours de travail + casting. Facturer en supplément. Obtenir validation écrite.</div>
+        </div>
+      </div>
+      <div class="item" style="margin-bottom:0">
+        <div class="t now">now</div>
+        <div class="ico a"><svg><use href="#i-action"/></svg></div>
+        <div class="c or"><span class="b w">Action ouverte</span>
+          <div class="tx or">Envoyer devis modificatif + nouveau planning</div>
+          <div class="mx or">Avant 17h aujourd'hui</div>
+        </div>
+      </div>
+    </div>
+    <div class="ib">
+      <div class="tr">
+        <div class="tbtn on">📝 Note</div><div class="tbtn off">⚡ Event</div>
+        <div class="tbtn off">✓ Action</div><div class="tbtn off">🔔 Remind</div>
+      </div>
+      <div class="ir"><div class="fi">Ajouter une note…</div><div class="sb"><svg><use href="#i-send"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
