@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Client Request OS — Clients</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;
+  --g50:#f8f9fc;--g100:#f1f3f8;--g200:#e4e8f0;--g300:#cdd3e0;
+  --g400:#9aa3b5;--g500:#6b7589;--g600:#4a5268;--g700:#323a52;
+  --g800:#1e2438;--g900:#0f1420;
+  --b50:#eff4ff;--b100:#dbe6fe;--b500:#3b71f8;--b600:#2d5ee8;
+  --gr50:#f0fdf4;--gr100:#dcfce7;--gr500:#22c55e;--gr600:#16a34a;
+  --r50:#fff1f2;--r100:#ffe4e6;--r500:#ef4444;--r600:#dc2626;
+  --a50:#fffbeb;--a100:#fef3c7;--a500:#f59e0b;--a600:#d97706;
+  --p50:#faf5ff;--p100:#f3e8ff;--p500:#a855f7;--p600:#9333ea;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --rad:10px;--rad2:14px;
+  --sh0:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh1:0 4px 16px rgba(0,0,0,.08);
+  --sh2:0 12px 40px rgba(0,0,0,.14);
+}
+html,body{
+  height:100%;font-family:var(--sans);font-size:15px;
+  color:var(--g800);background:var(--g50);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+
+/* ── TOP HEADER ── */
+.top-header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--g200);padding:0 16px;
+}
+.header-inner{
+  max-width:640px;margin:0 auto;
+  display:flex;align-items:center;gap:10px;height:56px;
+}
+.app-logo{display:flex;align-items:center;gap:9px}
+.logo-mark{
+  width:30px;height:30px;border-radius:8px;background:var(--b500);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.logo-mark svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-size:15px;font-weight:700;color:var(--g900);letter-spacing:-.4px}
+.header-gap{flex:1}
+.notif-btn{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--g200);
+  background:var(--white);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;position:relative;flex-shrink:0;
+}
+.notif-btn:hover{background:var(--g100)}
+.notif-btn svg{width:16px;height:16px;stroke:var(--g600);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.notif-dot{
+  position:absolute;top:6px;right:6px;width:7px;height:7px;
+  background:var(--r500);border-radius:50%;border:1.5px solid var(--white);
+}
+.avatar-sm{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--b500),#8b5cf6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;cursor:pointer;
+}
+
+/* ── HERO STATS ── */
+.hero-stats{
+  max-width:640px;margin:0 auto;
+  padding:16px 16px 0;
+}
+.hero-greeting{
+  font-size:22px;font-weight:700;color:var(--g900);
+  letter-spacing:-.5px;margin-bottom:4px;
+}
+.hero-sub{font-size:13px;color:var(--g400);margin-bottom:16px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sg-card{
+  background:var(--white);border:1px solid var(--g200);
+  border-radius:var(--rad2);padding:12px;
+  box-shadow:var(--sh0);text-align:center;
+}
+.sg-val{font-size:24px;font-weight:700;font-family:var(--mono);letter-spacing:-1px;color:var(--g900);line-height:1}
+.sg-lbl{font-size:10px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+.sg-card.bl .sg-val{color:var(--b500)}
+.sg-card.gr .sg-val{color:var(--gr500)}
+.sg-card.am .sg-val{color:var(--a500)}
+.sg-card.rd .sg-val{color:var(--r500)}
+
+/* ── SEARCH + FILTERS ── */
+.search-section{max-width:640px;margin:0 auto;padding:16px 16px 0}
+.search-wrap{position:relative;margin-bottom:10px}
+.search-wrap svg{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;stroke:var(--g400);fill:none;
+  stroke-width:2;stroke-linecap:round;pointer-events:none;
+}
+.search-input{
+  width:100%;background:var(--white);border:1.5px solid var(--g200);
+  border-radius:var(--rad2);padding:11px 14px 11px 38px;
+  font-size:14px;font-family:var(--sans);color:var(--g900);
+  outline:none;transition:all .15s;
+}
+.search-input::placeholder{color:var(--g400)}
+.search-input:focus{border-color:var(--b500);box-shadow:0 0 0 3px rgba(59,113,248,.1)}
+
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 13px;border-radius:20px;
+  border:1.5px solid var(--g200);background:var(--white);
+  font-size:12px;font-weight:600;color:var(--g500);
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  font-family:var(--sans);transition:all .15s;
+}
+.filter-btn:hover{background:var(--g100);border-color:var(--g300)}
+.filter-btn.on{background:var(--g900);border-color:var(--g900);color:#fff}
+.filter-btn.on.active-f{background:var(--gr600);border-color:var(--gr600)}
+.filter-btn.on.paused-f{background:var(--a600);border-color:var(--a600)}
+.filter-btn.on.done-f{background:var(--g600);border-color:var(--g600)}
+.filter-count{
+  font-size:10px;padding:1px 6px;border-radius:10px;
+  background:rgba(255,255,255,.2);font-family:var(--mono);
+}
+.filter-btn:not(.on) .filter-count{background:var(--g100);color:var(--g500)}
+
+/* ── SORT ROW ── */
+.sort-row{
+  max-width:640px;margin:0 auto;
+  padding:12px 16px 0;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sort-label{font-size:12px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:.5px}
+.sort-select{
+  background:none;border:none;font-size:12px;font-weight:600;
+  color:var(--g600);font-family:var(--sans);cursor:pointer;outline:none;
+  padding:4px 0;
+}
+
+/* ── CLIENT LIST ── */
+.client-list{
+  max-width:640px;margin:0 auto;
+  padding:12px 16px 100px;
+  display:flex;flex-direction:column;gap:8px;
+}
+
+/* ── CLIENT CARD ── */
+.client-card{
+  background:var(--white);border:1px solid var(--g200);
+  border-radius:var(--rad2);padding:14px 16px;
+  box-shadow:var(--sh0);cursor:pointer;
+  transition:all .18s;position:relative;overflow:hidden;
+  animation:cardIn .22s ease forwards;
+}
+.client-card:hover{
+  border-color:var(--g300);box-shadow:var(--sh1);
+  transform:translateY(-1px);
+}
+.client-card:active{transform:translateY(0) scale(.99)}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.card-row1{display:flex;align-items:flex-start;gap:12px}
+.client-avatar{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:700;color:#fff;letter-spacing:-.5px;
+}
+.card-info{flex:1;min-width:0}
+.card-name{font-size:15px;font-weight:700;color:var(--g900);letter-spacing:-.3px;margin-bottom:2px}
+.card-email{font-size:12px;color:var(--g400);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-status-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.status-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;font-family:var(--mono)}
+.status-pill.active{background:var(--gr100);color:var(--gr600)}
+.status-pill.paused{background:var(--a100);color:var(--a600)}
+.status-pill.done{background:var(--g100);color:var(--g500)}
+
+.card-row2{
+  display:flex;align-items:center;gap:8px;
+  margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--g100);
+}
+.card-meta{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--g400)}
+.card-meta svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.card-meta-sep{width:3px;height:3px;background:var(--g300);border-radius:50%}
+.card-chips{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.chip{
+  display:flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;padding:3px 8px;
+  border-radius:8px;font-family:var(--mono);
+}
+.chip.note{background:var(--b50);color:var(--b600)}
+.chip.action{background:var(--gr50);color:var(--gr600)}
+.chip.reminder{background:var(--a50);color:var(--a600)}
+.chip svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round}
+
+/* last activity bar */
+.activity-bar{
+  position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:var(--rad2) 0 0 var(--rad2);
+}
+.activity-bar.active{background:var(--gr500)}
+.activity-bar.paused{background:var(--a500)}
+.activity-bar.done{background:var(--g300)}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  max-width:640px;margin:40px auto;
+  display:flex;flex-direction:column;align-items:center;
+  gap:14px;padding:40px 20px;text-align:center;
+}
+.empty-state svg{width:56px;height:56px;stroke:var(--g300);fill:none;stroke-width:1;opacity:.6}
+.empty-state h3{font-size:17px;font-weight:700;color:var(--g600)}
+.empty-state p{font-size:14px;color:var(--g400);max-width:240px;line-height:1.7}
+
+/* ── FAB (Add Client) ── */
+.fab{
+  position:fixed;bottom:24px;right:16px;
+  padding-bottom:env(safe-area-inset-bottom);
+  z-index:100;
+}
+.fab-btn{
+  display:flex;align-items:center;gap:8px;
+  background:var(--b500);color:#fff;
+  border:none;border-radius:100px;
+  padding:13px 20px;font-size:14px;font-weight:600;
+  font-family:var(--sans);cursor:pointer;
+  box-shadow:0 4px 20px rgba(59,113,248,.4);
+  transition:all .18s;letter-spacing:-.2px;
+}
+.fab-btn:hover{background:var(--b600);transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,113,248,.45)}
+.fab-btn:active{transform:scale(.97)}
+.fab-btn svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round}
+
+/* ── MODAL (Add Client) ── */
+.modal-ovl{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-ovl.on{opacity:1;pointer-events:all}
+.modal-sheet{
+  width:100%;max-width:640px;
+  background:var(--white);border-radius:20px 20px 0 0;
+  padding:20px 20px calc(28px + env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.modal-ovl.on .modal-sheet{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:var(--g200);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:17px;font-weight:700;color:var(--g900);margin-bottom:4px;letter-spacing:-.4px}
+.modal-sub{font-size:13px;color:var(--g400);margin-bottom:20px}
+.modal-field{margin-bottom:12px}
+.modal-label{font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block;letter-spacing:.1px}
+.modal-inp{
+  width:100%;background:var(--g50);border:1.5px solid var(--g200);
+  border-radius:var(--rad);padding:12px 14px;
+  font-size:14px;font-family:var(--sans);color:var(--g900);
+  outline:none;transition:all .15s;
+}
+.modal-inp:focus{border-color:var(--b500);background:var(--white);box-shadow:0 0 0 3px rgba(59,113,248,.1)}
+.modal-inp::placeholder{color:var(--g400)}
+.modal-status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.modal-status-btn{
+  padding:10px;border-radius:var(--rad);border:1.5px solid var(--g200);
+  background:var(--white);font-size:12px;font-weight:600;
+  color:var(--g500);cursor:pointer;transition:all .15s;font-family:var(--sans);
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+}
+.modal-status-btn .pill-preview{font-size:10px;padding:2px 8px;border-radius:20px;font-family:var(--mono)}
+.modal-status-btn.on.active{border-color:var(--gr500);background:var(--gr50)}
+.modal-status-btn.on.paused{border-color:var(--a500);background:var(--a50)}
+.modal-status-btn.on.done{border-color:var(--g400);background:var(--g100)}
+.modal-divider{height:1px;background:var(--g100);margin:16px 0}
+.modal-btn{
+  width:100%;padding:14px;border-radius:var(--rad2);
+  background:var(--b500);border:none;color:#fff;
+  font-size:15px;font-weight:600;font-family:var(--sans);
+  cursor:pointer;transition:all .15s;letter-spacing:-.2px;
+}
+.modal-btn:hover{background:var(--b600)}
+.modal-btn:active{transform:scale(.98)}
+.modal-cancel{
+  width:100%;padding:12px;border-radius:var(--rad2);
+  background:none;border:1.5px solid var(--g200);color:var(--g500);
+  font-size:14px;font-weight:500;font-family:var(--sans);
+  cursor:pointer;transition:all .15s;margin-top:8px;
+}
+.modal-cancel:hover{background:var(--g50);border-color:var(--g300)}
+
+/* ── NOTIFICATIONS PANEL ── */
+.notif-panel{
+  position:fixed;top:56px;right:0;left:0;
+  z-index:200;display:flex;justify-content:flex-end;
+  pointer-events:none;
+}
+.notif-sheet{
+  width:100%;max-width:360px;
+  background:var(--white);border:1px solid var(--g200);
+  border-radius:0 0 var(--rad2) var(--rad2);
+  box-shadow:var(--sh2);
+  transform:translateY(-8px);opacity:0;pointer-events:none;
+  transition:all .22s cubic-bezier(.4,0,.2,1);
+  max-height:80vh;overflow-y:auto;
+}
+.notif-sheet.on{transform:translateY(0);opacity:1;pointer-events:all}
+.notif-head{padding:14px 16px;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between}
+.notif-head-title{font-size:13px;font-weight:700;color:var(--g800)}
+.notif-head-actions{display:flex;align-items:center;gap:10px}
+.notif-toggle-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--g500)}
+.tgl{position:relative;width:30px;height:16px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0;position:absolute}
+.tgl-tr{position:absolute;inset:0;border-radius:8px;background:var(--g300);cursor:pointer;transition:.2s}
+.tgl-tr::before{content:'';position:absolute;width:11px;height:11px;left:2px;top:2px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tgl input:checked+.tgl-tr{background:var(--b500)}
+.tgl input:checked+.tgl-tr::before{transform:translateX(14px)}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--g100);display:flex;gap:10px;align-items:flex-start;transition:background .12s;cursor:pointer}
+.notif-item:hover{background:var(--g50)}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:var(--b50)}
+.notif-item.unread:hover{background:#e8efff}
+.ni-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ni-icon svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ni-icon.ev{background:var(--g100);color:var(--g600)}
+.ni-icon.nt{background:var(--b100);color:var(--b600)}
+.ni-icon.ac{background:var(--gr100);color:var(--gr600)}
+.ni-icon.rm{background:var(--a100);color:var(--a600)}
+.ni-body{flex:1}
+.ni-text{font-size:13px;color:var(--g800);line-height:1.5;margin-bottom:2px}
+.ni-text strong{font-weight:600;color:var(--g900)}
+.ni-time{font-size:11px;color:var(--g400);font-family:var(--mono)}
+.ni-unread-dot{width:7px;height:7px;background:var(--b500);border-radius:50%;flex-shrink:0;margin-top:5px}
+.notif-empty{padding:32px 20px;text-align:center;font-size:13px;color:var(--g400)}
+
+/* ── TOAST ── */
+.toast-wrap{
+  position:fixed;top:68px;left:50%;transform:translateX(-50%);
+  z-index:400;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;width:calc(100% - 32px);max-width:400px;
+}
+.toast{
+  background:var(--g900);color:#fff;border-radius:var(--rad2);
+  padding:12px 16px;font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:9px;
+  box-shadow:var(--sh2);animation:toastIn .22s ease forwards;
+}
+.toast svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.toast.s svg{color:var(--gr500)}
+.toast.i svg{color:#60a5fa}
+.toast.e svg{color:var(--r500)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:scale(.94)}}
+</style>
+</head>
+<body>
+
+<!-- ── TOP HEADER ── -->
+<header class="top-header">
+  <div class="header-inner">
+    <div class="app-logo">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <span class="logo-name">Client OS</span>
+    </div>
+    <div class="header-gap"></div>
+    <button class="notif-btn" onclick="toggleNotif()" id="notif-btn">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-dot" id="notif-dot"></span>
+    </button>
+    <div class="avatar-sm">JD</div>
+  </div>
+</header>
+
+<!-- ── NOTIFICATIONS PANEL ── -->
+<div class="notif-panel" id="notif-panel-wrap">
+  <div class="notif-sheet" id="notif-sheet">
+    <div class="notif-head">
+      <span class="notif-head-title">Notifications</span>
+      <div class="notif-head-actions">
+        <div class="notif-toggle-row">
+          <span>Live</span>
+          <label class="tgl"><input type="checkbox" checked><div class="tgl-tr"></div></label>
+        </div>
+      </div>
+    </div>
+    <div id="notif-list"></div>
+  </div>
+</div>
+
+<!-- ── HERO STATS ── -->
+<div class="hero-stats">
+  <div class="hero-greeting">Good morning, Jean 👋</div>
+  <div class="hero-sub">Here's what's happening with your clients today.</div>
+  <div class="stats-grid">
+    <div class="sg-card bl"><div class="sg-val" id="sg-total">8</div><div class="sg-lbl">Clients</div></div>
+    <div class="sg-card gr"><div class="sg-val" id="sg-active">5</div><div class="sg-lbl">Active</div></div>
+    <div class="sg-card am"><div class="sg-val" id="sg-reminders">3</div><div class="sg-lbl">Reminders</div></div>
+    <div class="sg-card rd"><div class="sg-val" id="sg-overdue">1</div><div class="sg-lbl">Overdue</div></div>
+  </div>
+</div>
+
+<!-- ── SEARCH + FILTERS ── -->
+<div class="search-section">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-input" id="search-q" placeholder="Search clients…" oninput="filterClients()">
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn on" id="fb-all" onclick="setFilter('all',this)">All<span class="filter-count" id="fc-all">8</span></button>
+    <button class="filter-btn active-f" id="fb-active" onclick="setFilter('active',this)">Active<span class="filter-count" id="fc-active">5</span></button>
+    <button class="filter-btn paused-f" id="fb-paused" onclick="setFilter('paused',this)">Paused<span class="filter-count" id="fc-paused">2</span></button>
+    <button class="filter-btn done-f" id="fb-done" onclick="setFilter('done',this)">Done<span class="filter-count" id="fc-done">1</span></button>
+  </div>
+</div>
+
+<!-- ── SORT ROW ── -->
+<div class="sort-row">
+  <span class="sort-label" id="results-label">8 clients</span>
+  <select class="sort-select" onchange="sortClients(this.value)">
+    <option value="activity">Last activity</option>
+    <option value="name">Name A–Z</option>
+    <option value="status">Status</option>
+    <option value="items">Most items</option>
+  </select>
+</div>
+
+<!-- ── CLIENT LIST ── -->
+<div class="client-list" id="client-list"></div>
+
+<!-- ── FAB ── -->
+<div class="fab">
+  <button class="fab-btn" onclick="openAddModal()">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add client
+  </button>
+</div>
+
+<!-- ── ADD CLIENT MODAL ── -->
+<div class="modal-ovl" id="add-modal" onclick="handleModalClick(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">New client</div>
+    <div class="modal-sub">Add a client to start tracking your relationship.</div>
+    <div class="modal-field">
+      <label class="modal-label">Full name or company *</label>
+      <input class="modal-inp" id="add-name" placeholder="e.g. Acme Studio" maxlength="60">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Email address</label>
+      <input class="modal-inp" id="add-email" type="email" placeholder="e.g. sarah@acmestudio.co">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Tags / Notes (optional)</label>
+      <input class="modal-inp" id="add-tags" placeholder="e.g. SaaS startup, referral from Marc">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Status</label>
+      <div class="modal-status-row">
+        <button class="modal-status-btn on active" id="ms-active" onclick="setModalStatus('active')">
+          <span class="pill-preview" style="background:var(--gr100);color:var(--gr600)">Active</span>
+          Starting now
+        </button>
+        <button class="modal-status-btn paused" id="ms-paused" onclick="setModalStatus('paused')">
+          <span class="pill-preview" style="background:var(--a100);color:var(--a600)">Paused</span>
+          On hold
+        </button>
+        <button class="modal-status-btn done" id="ms-done" onclick="setModalStatus('done')">
+          <span class="pill-preview" style="background:var(--g100);color:var(--g500)">Done</span>
+          Completed
+        </button>
+      </div>
+    </div>
+    <div class="modal-divider"></div>
+    <button class="modal-btn" onclick="addClient()">Create client</button>
+    <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ── -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+var CLIENTS = [
+  {
+    id:1, name:'Acme Studio', email:'sarah@acmestudio.co',
+    status:'active', tags:'Brand refresh · Website',
+    lastActivity: new Date(Date.now() - 2*60*1000).toISOString(),
+    items:14, openActions:3, reminders:2,
+    avatarColor:['#3b71f8','#8b5cf6'], initials:'AS',
+    lastNote:'50% deposit paid. Timeline: 6 weeks.',
+  },
+  {
+    id:2, name:'Bright Minds Agency', email:'tom@brightminds.io',
+    status:'active', tags:'SEO · Content strategy',
+    lastActivity: new Date(Date.now() - 35*60*1000).toISOString(),
+    items:9, openActions:1, reminders:1,
+    avatarColor:['#22c55e','#16a34a'], initials:'BM',
+    lastNote:'Call scheduled for Friday 10am.',
+  },
+  {
+    id:3, name:'Nova Legal', email:'claire@novalegal.eu',
+    status:'active', tags:'Document automation · MVP',
+    lastActivity: new Date(Date.now() - 3*3600*1000).toISOString(),
+    items:22, openActions:4, reminders:0,
+    avatarColor:['#f59e0b','#d97706'], initials:'NL',
+    lastNote:'Waiting on legal team approval for wireframes.',
+  },
+  {
+    id:4, name:'Pixel Republic', email:'alex@pixelrepublic.com',
+    status:'paused', tags:'E-commerce · Figma',
+    lastActivity: new Date(Date.now() - 2*24*3600*1000).toISOString(),
+    items:6, openActions:0, reminders:1,
+    avatarColor:['#a855f7','#7c3aed'], initials:'PR',
+    lastNote:'Client on vacation until June 3rd.',
+  },
+  {
+    id:5, name:'Groundwork Co.', email:'james@groundwork.co',
+    status:'active', tags:'Dashboard · SaaS',
+    lastActivity: new Date(Date.now() - 5*3600*1000).toISOString(),
+    items:31, openActions:2, reminders:1,
+    avatarColor:['#ef4444','#dc2626'], initials:'GC',
+    lastNote:'First module delivered. Feedback due by EOW.',
+  },
+  {
+    id:6, name:'Zephyr Health', email:'nina@zephyrhealth.co',
+    status:'active', tags:'Healthcare · Compliance',
+    lastActivity: new Date(Date.now() - 1*24*3600*1000).toISOString(),
+    items:17, openActions:1, reminders:2,
+    avatarColor:['#06b6d4','#0891b2'], initials:'ZH',
+    lastNote:'GDPR compliance checklist shared.',
+  },
+  {
+    id:7, name:'Maple & Sons', email:'eric@mapleandsons.ca',
+    status:'paused', tags:'Rebrand · Print',
+    lastActivity: new Date(Date.now() - 5*24*3600*1000).toISOString(),
+    items:4, openActions:0, reminders:0,
+    avatarColor:['#84cc16','#65a30d'], initials:'MS',
+    lastNote:'Budget review needed before proceeding.',
+  },
+  {
+    id:8, name:'Blue Harbor Events', email:'lisa@blueharborevents.com',
+    status:'done', tags:'Event website · Completed',
+    lastActivity: new Date(Date.now() - 14*24*3600*1000).toISOString(),
+    items:28, openActions:0, reminders:0,
+    avatarColor:['#3b82f6','#1d4ed8'], initials:'BH',
+    lastNote:'Project completed. Invoice paid. Great collaboration!',
+  },
+];
+
+var NOTIFICATIONS = [
+  {id:1, type:'rm', text:'Reminder: <strong>Call Sarah</strong> to walk through the proposal', time:'5m ago', unread:true, client:'Acme Studio'},
+  {id:2, type:'ac', text:'<strong>Groundwork Co.</strong> — action "First module delivered" is due today', time:'1h ago', unread:true, client:'Groundwork Co.'},
+  {id:3, type:'nt', text:'You added a note to <strong>Zephyr Health</strong>', time:'3h ago', unread:false, client:'Zephyr Health'},
+  {id:4, type:'ev', text:'New event logged for <strong>Nova Legal</strong> — approval pending', time:'Yesterday', unread:false, client:'Nova Legal'},
+  {id:5, type:'rm', text:'Reminder: <strong>Send logo concepts</strong> to Acme Studio by May 30', time:'Yesterday', unread:false, client:'Acme Studio'},
+];
+
+var nextId = 9;
+var curFilter = 'all';
+var curSort = 'activity';
+var modalStatus = 'active';
+var notifOpen = false;
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function getFiltered() {
+  var q = document.getElementById('search-q').value.toLowerCase().trim();
+  return CLIENTS.filter(function(c) {
+    var matchStatus = curFilter === 'all' || c.status === curFilter;
+    var matchQ = !q ||
+      c.name.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q) ||
+      (c.tags && c.tags.toLowerCase().includes(q));
+    return matchStatus && matchQ;
+  });
+}
+
+function getSorted(list) {
+  return list.slice().sort(function(a, b) {
+    if (curSort === 'activity') return new Date(b.lastActivity) - new Date(a.lastActivity);
+    if (curSort === 'name') return a.name.localeCompare(b.name);
+    if (curSort === 'status') {
+      var order = {active:0, paused:1, done:2};
+      return (order[a.status]||0) - (order[b.status]||0);
+    }
+    if (curSort === 'items') return b.items - a.items;
+    return 0;
+  });
+}
+
+function renderClients() {
+  var list = document.getElementById('client-list');
+  var filtered = getFiltered();
+  var sorted = getSorted(filtered);
+
+  // Update filter counts
+  ['all','active','paused','done'].forEach(function(f) {
+    var cnt = f === 'all' ? CLIENTS.length : CLIENTS.filter(function(c){ return c.status === f; }).length;
+    var el = document.getElementById('fc-'+f);
+    if (el) el.textContent = cnt;
+  });
+
+  // Update summary stats
+  document.getElementById('sg-total').textContent = CLIENTS.length;
+  document.getElementById('sg-active').textContent = CLIENTS.filter(function(c){ return c.status === 'active'; }).length;
+  document.getElementById('sg-reminders').textContent = CLIENTS.reduce(function(s,c){ return s+c.reminders; }, 0);
+
+  // Results label
+  document.getElementById('results-label').textContent = sorted.length + ' client' + (sorted.length !== 1 ? 's' : '');
+
+  if (!sorted.length) {
+    list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><h3>No clients found</h3><p>Try a different search or filter, or add a new client.</p></div>';
+    return;
+  }
+
+  list.innerHTML = sorted.map(function(c, i) {
+    return renderCard(c, i);
+  }).join('');
+}
+
+function renderCard(c, i) {
+  var delay = Math.min(i * 40, 200);
+  var grad = 'linear-gradient(135deg,' + c.avatarColor[0] + ',' + c.avatarColor[1] + ')';
+  var chips = '';
+  if (c.openActions > 0) chips += '<span class="chip action"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>' + c.openActions + ' open</span>';
+  if (c.reminders > 0) chips += '<span class="chip reminder"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' + c.reminders + '</span>';
+  if (c.items > 0) chips += '<span class="chip note"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>' + c.items + '</span>';
+
+  return '<div class="client-card" style="animation-delay:'+delay+'ms" onclick="openClient('+c.id+')">' +
+    '<div class="activity-bar '+c.status+'"></div>' +
+    '<div class="card-row1">' +
+      '<div class="client-avatar" style="background:'+grad+'">'+c.initials+'</div>' +
+      '<div class="card-info">' +
+        '<div class="card-name">'+esc(c.name)+'</div>' +
+        '<div class="card-email">'+esc(c.email)+'</div>' +
+      '</div>' +
+      '<div class="card-status-wrap">' +
+        '<span class="status-pill '+c.status+'">'+c.status+'</span>' +
+      '</div>' +
+    '</div>' +
+    (c.lastNote ? '<div style="font-size:12px;color:var(--g500);margin:10px 0 0;padding-left:54px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">'+esc(c.lastNote)+'</div>' : '') +
+    '<div class="card-row2">' +
+      '<div class="card-meta"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+ago(c.lastActivity)+'</div>' +
+      (c.tags ? '<div class="card-meta-sep"></div><div class="card-meta" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px">'+esc(c.tags.split('·')[0].trim())+'</div>' : '') +
+      '<div class="card-chips">'+chips+'</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  curFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  renderClients();
+}
+
+function filterClients() { renderClients(); }
+
+function sortClients(val) {
+  curSort = val;
+  renderClients();
+}
+
+// ── CLIENT OPEN ───────────────────────────────────────────────────────────────
+function openClient(id) {
+  var c = CLIENTS.find(function(x){ return x.id === id; });
+  if (!c) return;
+  toast('Opening ' + c.name + '…','i');
+  // In a real app: navigate to client-timeline.html?id=X
+}
+
+// ── ADD CLIENT MODAL ──────────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-email').value = '';
+  document.getElementById('add-tags').value = '';
+  setModalStatus('active');
+  document.getElementById('add-modal').classList.add('on');
+  setTimeout(function(){ document.getElementById('add-name').focus(); }, 300);
+}
+
+function closeModal() {
+  document.getElementById('add-modal').classList.remove('on');
+}
+
+function handleModalClick(e) {
+  if (e.target === document.getElementById('add-modal')) closeModal();
+}
+
+function setModalStatus(s) {
+  modalStatus = s;
+  ['active','paused','done'].forEach(function(st) {
+    var btn = document.getElementById('ms-'+st);
+    btn.className = 'modal-status-btn ' + (s === st ? 'on ' : '') + st;
+  });
+}
+
+function addClient() {
+  var name = document.getElementById('add-name').value.trim();
+  var email = document.getElementById('add-email').value.trim();
+  var tags = document.getElementById('add-tags').value.trim();
+  if (!name) {
+    document.getElementById('add-name').focus();
+    document.getElementById('add-name').style.borderColor = 'var(--r500)';
+    setTimeout(function(){ document.getElementById('add-name').style.borderColor = ''; }, 1500);
+    return;
+  }
+  var initials = name.split(' ').slice(0,2).map(function(w){ return w[0].toUpperCase(); }).join('');
+  var colors = [
+    ['#3b71f8','#8b5cf6'],['#22c55e','#16a34a'],['#f59e0b','#d97706'],
+    ['#a855f7','#7c3aed'],['#ef4444','#dc2626'],['#06b6d4','#0891b2'],
+  ];
+  var col = colors[nextId % colors.length];
+  var newClient = {
+    id: nextId++,
+    name: name, email: email || '—',
+    status: modalStatus, tags: tags || '',
+    lastActivity: new Date().toISOString(),
+    items: 0, openActions: 0, reminders: 0,
+    avatarColor: col, initials: initials,
+    lastNote: '',
+  };
+  CLIENTS.unshift(newClient);
+  closeModal();
+  renderClients();
+  addNotif('nt', 'New client <strong>' + esc(name) + '</strong> added to your workspace');
+  toast(name + ' added ✓','s');
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+function toggleNotif() {
+  notifOpen = !notifOpen;
+  document.getElementById('notif-sheet').classList.toggle('on', notifOpen);
+  if (notifOpen) {
+    renderNotifs();
+    // Mark all read after a moment
+    setTimeout(function() {
+      NOTIFICATIONS.forEach(function(n){ n.unread = false; });
+      document.getElementById('notif-dot').style.display = 'none';
+    }, 1200);
+  }
+}
+
+function renderNotifs() {
+  var icons = {
+    ev:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    nt:'<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+    ac:'<svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    rm:'<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+  };
+  var list = document.getElementById('notif-list');
+  if (!NOTIFICATIONS.length) {
+    list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+    return;
+  }
+  list.innerHTML = NOTIFICATIONS.map(function(n) {
+    return '<div class="notif-item'+(n.unread?' unread':'')+'">' +
+      '<div class="ni-icon '+n.type+'">'+icons[n.type]+'</div>' +
+      '<div class="ni-body">' +
+        '<div class="ni-text">'+n.text+'</div>' +
+        '<div class="ni-time">'+n.time+(n.client ? ' · '+n.client : '')+'</div>' +
+      '</div>' +
+      (n.unread ? '<div class="ni-unread-dot"></div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function addNotif(type, text) {
+  NOTIFICATIONS.unshift({id: Date.now(), type:type, text:text, time:'Just now', unread:true});
+  document.getElementById('notif-dot').style.display = 'block';
+  if (notifOpen) renderNotifs();
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────────
+function ago(ts) {
+  var diff = Math.floor((Date.now() - new Date(ts)) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
+  return Math.floor(diff/604800) + 'w ago';
+}
+
+function esc(s) {
+  return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────────
+function toast(msg, type) {
+  var wrap = document.getElementById('toast-wrap');
+  var icons = {
+    s:'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+    i:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    e:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+  };
+  var el = document.createElement('div');
+  el.className = 'toast ' + (type||'i');
+  el.innerHTML = (icons[type]||icons.i) + msg;
+  wrap.appendChild(el);
+  setTimeout(function() {
+    el.style.animation = 'toastOut .2s ease forwards';
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 220);
+  }, 2600);
+}
+
+// ── CLOSE NOTIF ON OUTSIDE CLICK ──────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  if (!notifOpen) return;
+  var sheet = document.getElementById('notif-sheet');
+  var btn = document.getElementById('notif-btn');
+  if (!sheet.contains(e.target) && !btn.contains(e.target)) {
+    notifOpen = false;
+    sheet.classList.remove('on');
+  }
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderClients();
+renderNotifs();
+</script>
+</body>
+</html>
