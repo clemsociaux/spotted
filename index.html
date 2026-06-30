@@ -504,7 +504,7 @@ body {
         <div class="submit-section-lbl">Formulaire de soumission</div>
 
         <!-- ⬇️ REMPLACE CE LIEN PAR TON VRAI LIEN TALLY -->
-        <a class="tally-card" href="https://tally.so" target="_blank">
+        <a class="tally-card" href="https://tally.so/r/VLdyXl" target="_blank">
           <div class="tally-icon" style="background:linear-gradient(135deg,#d5f5e0,#b0e8c8)">📝</div>
           <div class="tally-body">
             <div class="tally-title">Soumettre une ressource</div>
@@ -554,50 +554,95 @@ body {
 // ══════════════════════════════════════════════════════
 const resources = [
   {
-    type: "video", icon: "🎥",
+    type: "video", icon: "🧠",
     bg: "linear-gradient(135deg,#ffe0d5,#ffc4b0)",
-    title: "Comment fonctionne vraiment la mémoire",
-    why: "Explique <strong>la répétition espacée</strong> de façon concrète. Indispensable pour apprendre plus vite.",
-    duration: "14 min",
-    url: "https://youtube.com",
-    author: "Alex"
+    title: "Pourquoi les gens intelligents apprennent plus lentement",
+    why: "Une excellente explication de <strong>l'apprentissage profond et durable</strong>, loin des méthodes miracles.",
+    duration: "17 min",
+    url: "https://www.youtube.com/watch?v=IlU-zDU6aQ0",
+    author: "Thomas"
   },
   {
-    type: "tool", icon: "🛠️",
+    type: "tool", icon: "🧩",
     bg: "linear-gradient(135deg,#d5f5e0,#b0e8c8)",
-    title: "Excalidraw — dessiner des schémas en 2 minutes",
-    why: "Gratuit, ultra simple. Je l'utilise pour <strong>tous mes brouillons</strong> maintenant.",
-    duration: "Gratuit",
-    url: "https://excalidraw.com",
-    author: "Alex"
+    title: "Heptabase — penser visuellement sans chaos",
+    why: "Un mélange entre prise de notes et cartes mentales. Idéal pour <strong>relier des idées complexes</strong> et construire sa réflexion.",
+    duration: "Freemium",
+    url: "https://heptabase.com",
+    author: "Sarah"
   },
   {
-    type: "article", icon: "📄",
+    type: "article", icon: "📖",
     bg: "linear-gradient(135deg,#d5e8ff,#b0d0ff)",
-    title: "Pourquoi la procrastination n'est pas la paresse",
-    why: "Change la façon de voir le problème. <strong>L'angle psychologique</strong> est bien sourcé.",
-    duration: "Lecture 8 min",
-    url: "https://example.com",
-    author: "Alex"
+    title: "La règle des 10 000 heures est-elle un mythe ?",
+    why: "Une analyse nuancée qui montre pourquoi <strong>la pratique seule ne suffit pas</strong>.",
+    duration: "Lecture 9 min",
+    url: "https://fs.blog/deliberate-practice-guide/",
+    author: "Nicolas"
   },
   {
-    type: "podcast", icon: "🎧",
+    type: "podcast", icon: "🎙️",
     bg: "linear-gradient(135deg,#f0d5ff,#e0b0f5)",
-    title: "La prise de décision sous incertitude",
-    why: "Dense mais <strong>donne un vrai cadre</strong> pour les décisions importantes. Réécouté deux fois.",
-    duration: "52 min",
-    url: "https://example.com",
-    author: "Sophie"
+    title: "Comment prendre de meilleures décisions",
+    why: "Des modèles mentaux concrets pour <strong>éviter les biais cognitifs</strong> au quotidien.",
+    duration: "1h12",
+    url: "https://www.farnamstreetblog.com/podcast/",
+    author: "Julie"
   },
   {
     type: "book", icon: "📚",
     bg: "linear-gradient(135deg,#fff0d0,#ffe0a0)",
-    title: "Atomic Habits — James Clear",
-    why: "Le chapitre sur <strong>l'identité plutôt que les objectifs</strong> a tout changé pour moi.",
-    duration: "~5h",
-    url: "https://example.com",
-    author: "Alex"
+    title: "Deep Work — Cal Newport",
+    why: "Probablement le meilleur livre sur <strong>la concentration à l'ère des distractions</strong>.",
+    duration: "~6h",
+    url: "https://calnewport.com/writing/",
+    author: "Maxime"
   },
+  {
+    type: "tool", icon: "🗺️",
+    bg: "linear-gradient(135deg,#ffe3ef,#ffc9df)",
+    title: "Napkin AI — transformer une idée en schéma",
+    why: "Tu écris une idée, l'outil génère automatiquement <strong>un visuel clair et partageable</strong>.",
+    duration: "Freemium",
+    url: "https://napkin.ai",
+    author: "Emma"
+  },
+  {
+    type: "article", icon: "🚀",
+    bg: "linear-gradient(135deg,#e3f7ff,#c9ecff)",
+    title: "Comment les startups trouvent leurs premières idées",
+    why: "Un guide fascinant sur les méthodes utilisées par <strong>les meilleurs fondateurs</strong>.",
+    duration: "Lecture 12 min",
+    url: "https://paulgraham.com/startupideas.html",
+    author: "Lucas"
+  },
+  {
+    type: "video", icon: "💡",
+    bg: "linear-gradient(135deg,#fff2d8,#ffe1ab)",
+    title: "Le paradoxe du choix expliqué simplement",
+    why: "Comprendre pourquoi <strong>trop d'options réduit souvent notre satisfaction</strong>.",
+    duration: "11 min",
+    url: "https://www.youtube.com/watch?v=VO6XEQIsCoM",
+    author: "Camille"
+  },
+  {
+    type: "podcast", icon: "🎧",
+    bg: "linear-gradient(135deg,#e8dcff,#d2b8ff)",
+    title: "L'effet cumulé des petites habitudes",
+    why: "Une discussion passionnante sur la façon dont <strong>les micro-actions changent une vie</strong>.",
+    duration: "48 min",
+    url: "https://jamesclear.com/podcast",
+    author: "Antoine"
+  },
+  {
+    type: "tool", icon: "🔍",
+    bg: "linear-gradient(135deg,#dff7f1,#b8ebdd)",
+    title: "Perplexity — explorer un sujet avec ses sources",
+    why: "Très pratique pour apprendre rapidement grâce à des réponses accompagnées de <strong>liens vérifiables</strong>.",
+    duration: "Freemium",
+    url: "https://www.perplexity.ai",
+    author: "Léa"
+  }
 ];
 
 // ══════════════════════════════════════════════════════
